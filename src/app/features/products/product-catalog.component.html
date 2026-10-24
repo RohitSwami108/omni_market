@@ -15,22 +15,12 @@
         <svg class="search-icon" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
         </svg>
-        <input 
-          type="text" 
-          class="search-input" 
-          placeholder="Filter by SKU, name, or hardware spec..."
-          [value]="searchQuery()"
-          (input)="searchQuery.set($any($event.target).value)">
+        <input type="text" class="search-input" placeholder="Filter by SKU, name, or hardware spec..." [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)">
         <kbd class="shortcut-tag">⌘K</kbd>
       </div>
 
       <!-- Toggle Filter Rail Button -->
-      <button 
-        type="button" 
-        class="filter-toggle-btn"
-        [class.active]="isFilterDockOpen()"
-        (click)="toggleFilterDock()"
-        title="Toggle Filter Rail">
+      <button type="button" class="filter-toggle-btn" [class.active]="isFilterDockOpen()" (click)="toggleFilterDock()" title="Toggle Filter Rail">
         <svg viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
         </svg>
@@ -76,12 +66,7 @@
             </svg>
             <h2 class="dock-title">Refine Filters</h2>
           </div>
-          <button 
-            type="button" 
-            class="dock-reset-btn" 
-            (click)="selectedCategories.set([]); priceRange.set({min: 0, max: 5000})">
-            Reset
-          </button>
+          <button type="button" class="dock-reset-btn" (click)="selectedCategories.set([]); priceRange.set({min: 0, max: 5000})"> Reset </button>
         </div>
 
         <div class="dock-sections">
@@ -92,10 +77,7 @@
             <div class="filter-options-list">
               @for (cat of categoryOptions; track cat.name) {
                 <label class="dock-checkbox-row">
-                  <input 
-                    type="checkbox" 
-                    [checked]="selectedCategories().includes(cat.name)"
-                    (change)="toggleCategory(cat.name)">
+                  <input type="checkbox" [checked]="selectedCategories().includes(cat.name)" (change)="toggleCategory(cat.name)">
                   <span class="dock-check-box"></span>
                   <span class="cat-label">{{ cat.name }}</span>
                   <span class="cat-count">{{ cat.count }}</span>
@@ -116,26 +98,10 @@
             </div>
 
             <div class="dual-slider-container">
-              <div class="slider-track-highlight" 
-                [style.left.%]="(priceRange().min / 5000) * 100"
-                [style.right.%]="100 - (priceRange().max / 5000) * 100">
+              <div class="slider-track-highlight" [style.left.%]="(priceRange().min / 5000) * 100" [style.right.%]="100 - (priceRange().max / 5000) * 100">
               </div>
-              <input 
-                type="range" 
-                min="0" 
-                max="5000" 
-                step="50"
-                [value]="priceRange().min" 
-                (input)="updatePriceRange('min', $event)"
-                class="range-thumb range-thumb-min">
-              <input 
-                type="range" 
-                min="0" 
-                max="5000" 
-                step="50"
-                [value]="priceRange().max" 
-                (input)="updatePriceRange('max', $event)"
-                class="range-thumb range-thumb-max">
+              <input type="range" min="0" max="5000" step="50" [value]="priceRange().min" (input)="updatePriceRange('min', $event)" class="range-thumb range-thumb-min">
+              <input type="range" min="0" max="5000" step="50" [value]="priceRange().max" (input)="updatePriceRange('max', $event)" class="range-thumb range-thumb-max">
             </div>
           </div>
 
@@ -174,10 +140,7 @@
               <!-- Row Select All -->
               <th class="col-checkbox">
                 <label class="table-checkbox">
-                  <input 
-                    type="checkbox" 
-                    [checked]="isAllSelected()"
-                    (change)="toggleSelectAll()">
+                  <input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll()">
                   <span class="check-indicator"></span>
                 </label>
               </th>
@@ -266,10 +229,7 @@
                 <!-- Checkbox -->
                 <td class="col-checkbox" (click)="$event.stopPropagation()">
                   <label class="table-checkbox">
-                    <input 
-                      type="checkbox" 
-                      [checked]="selectedRowIds().has(product.id)"
-                      (change)="toggleSelectRow(product.id)">
+                    <input type="checkbox" [checked]="selectedRowIds().has(product.id)" (change)="toggleSelectRow(product.id)">
                     <span class="check-indicator"></span>
                   </label>
                 </td>
@@ -320,10 +280,7 @@
                       <span class="stock-units">{{ product.stock }} units</span>
                     </div>
                     <div class="stock-bar-track">
-                      <div 
-                        class="stock-bar-fill"
-                        [class]="product.stockStatus"
-                        [style.width.%]="product.stock > 100 ? 100 : product.stock">
+                      <div class="stock-bar-fill" [class]="product.stockStatus" [style.width.%]="product.stock > 100 ? 100 : product.stock">
                       </div>
                     </div>
                   </div>
@@ -332,20 +289,12 @@
                 <!-- Action Buttons -->
                 <td class="col-actions text-right" (click)="$event.stopPropagation()">
                   <div class="row-actions-group">
-                    <button 
-                      type="button" 
-                      class="row-action-btn edit-btn" 
-                      (click)="openEditDrawer(product)"
-                      title="Edit Product Spec">
+                    <button type="button" class="row-action-btn edit-btn" (click)="openEditDrawer(product)" title="Edit Product Spec">
                       <svg viewBox="0 0 20 20" fill="currentColor">
                         <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                       </svg>
                     </button>
-                    <button 
-                      type="button" 
-                      class="row-action-btn delete-btn" 
-                      (click)="deleteProduct(product, $event)"
-                      title="Archive SKU">
+                    <button type="button" class="row-action-btn delete-btn" (click)="deleteProduct(product, $event)" title="Archive SKU">
                       <svg viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                       </svg>
@@ -436,12 +385,7 @@
             <!-- Product Title -->
             <div class="drawer-field">
               <label class="drawer-label" for="prod-name">Product Name *</label>
-              <input 
-                id="prod-name"
-                type="text" 
-                formControlName="name"
-                class="drawer-input" 
-                placeholder="e.g. OmniEdge 5G Enterprise Gateway">
+              <input id="prod-name" type="text" formControlName="name" class="drawer-input" placeholder="e.g. OmniEdge 5G Enterprise Gateway">
               <app-input-error [control]="productForm.controls.name" fieldLabel="Product Name"></app-input-error>
             </div>
 
@@ -474,23 +418,14 @@
                 <label class="drawer-label" for="prod-price">Retail Price ($ USD) *</label>
                 <div class="price-input-adornment">
                   <span class="currency-symbol">$</span>
-                  <input 
-                    id="prod-price"
-                    type="number" 
-                    step="0.01" 
-                    formControlName="price"
-                    class="drawer-input">
+                  <input id="prod-price" type="number" step="0.01" formControlName="price" class="drawer-input">
                 </div>
                 <app-input-error [control]="productForm.controls.price" fieldLabel="Price"></app-input-error>
               </div>
 
               <div class="drawer-field">
                 <label class="drawer-label" for="prod-stock">Initial Stock Quantity *</label>
-                <input 
-                  id="prod-stock"
-                  type="number" 
-                  formControlName="stock"
-                  class="drawer-input">
+                <input id="prod-stock" type="number" formControlName="stock" class="drawer-input">
                 <app-input-error [control]="productForm.controls.stock" fieldLabel="Stock"></app-input-error>
               </div>
             </div>
@@ -499,15 +434,8 @@
             <div class="drawer-field">
               <label class="drawer-label">Product Visual Asset</label>
               
-              <div 
-                class="file-drop-zone"
-                [class.drag-over]="isDraggingOver()"
-                (dragover)="onDragOver($event)"
-                (dragleave)="onDragLeave($event)"
-                (drop)="onDrop($event)">
-                
+              <div class="file-drop-zone" [class.drag-over]="isDraggingOver()" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
                 <input type="file" id="asset-upload" class="hidden-file-input" accept="image/*">
-                
                 <div class="drop-zone-content">
                   <div class="upload-icon-circle">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -552,12 +480,7 @@
             <!-- Description -->
             <div class="drawer-field">
               <label class="drawer-label" for="prod-desc">Specification Summary</label>
-              <textarea 
-                id="prod-desc"
-                formControlName="description"
-                rows="3" 
-                class="drawer-textarea" 
-                placeholder="Enterprise specifications, firmware version, and packaging tags..."></textarea>
+              <textarea id="prod-desc" formControlName="description" rows="3" class="drawer-textarea" placeholder="Enterprise specifications, firmware version, and packaging tags..."></textarea>
             </div>
 
           </form>

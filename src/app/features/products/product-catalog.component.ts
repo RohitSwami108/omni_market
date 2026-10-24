@@ -1,19 +1,9 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import { ProductService } from '../../core/services/product';
+import { ProductItem, ProductFilters, PaginatedResponse } from '../../core/model/product.model';
 import { InputErrorComponent } from '../../shared/components/input-error/input-error.component';
-
-export interface ProductItem {
-  id: string;
-  name: string;
-  sku: string;
-  category: string;
-  price: number;
-  stock: number;
-  stockStatus: 'in_stock' | 'low_stock' | 'out_of_stock';
-  imageUrl: string;
-  updatedAt: string;
-}
 
 @Component({
   selector: 'app-product-catalog',
@@ -22,23 +12,37 @@ export interface ProductItem {
   templateUrl: './product-catalog.component.html',
   styleUrl: './product-catalog.component.scss'
 })
-export class ProductCatalogComponent {
-  // UI State Signals
+export class ProductCatalogComponent implements OnInit {
+  private readonly productService = inject(ProductService);
+
+  // 1. UI State Signals
   readonly isFilterDockOpen = signal<boolean>(true);
   readonly isDrawerOpen = signal<boolean>(false);
   readonly drawerMode = signal<'create' | 'edit'>('create');
-  
-  // Table Interaction Signals
+  readonly selectedRowIds = signal<Set<string>>(new Set<string>());
+
+  // 2. Filter & Search Signals
   readonly searchQuery = signal<string>('');
   readonly selectedCategories = signal<string[]>(['Electronics', 'Networking']);
   readonly priceRange = signal<{ min: number; max: number }>({ min: 50, max: 2400 });
-  readonly sortField = signal<keyof ProductItem>('name');
+
+  // Aliases for backend consistency
+  readonly searchTerm = this.searchQuery;
+  readonly minPrice = computed(() => this.priceRange().min);
+  readonly maxPrice = computed(() => this.priceRange().max);
+
+  // 3. Sorting & Pagination Signals
+  readonly sortField = signal<keyof ProductItem | string>('name');
   readonly sortDirection = signal<'asc' | 'desc'>('asc');
   readonly currentPage = signal<number>(1);
   readonly pageSize = signal<number>(10);
-  readonly selectedRowIds = signal<Set<string>>(new Set<string>());
 
-  // File Upload Simulation Signals
+  // Aliases
+  readonly sortBy = this.sortField;
+  readonly sortOrder = this.sortDirection;
+  readonly pageNumber = this.currentPage;
+
+  // 4. File Upload Simulation Signals
   readonly isDraggingOver = signal<boolean>(false);
   readonly uploadedFile = signal<{ name: string; size: string; progress: number } | null>({
     name: 'omnigateway-pro-render.webp',
@@ -46,7 +50,7 @@ export class ProductCatalogComponent {
     progress: 82
   });
 
-  // Drawer Form
+  // 5. Drawer Form
   readonly productForm = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.minLength(4)]),
     sku: new FormControl('', [Validators.required, Validators.pattern(/^[A-Z0-9-]+$/)]),
@@ -56,7 +60,7 @@ export class ProductCatalogComponent {
     description: new FormControl('')
   });
 
-  // Category Catalog with Counts
+  // 6. Categories Definition
   readonly categoryOptions = [
     { name: 'Electronics', count: 142 },
     { name: 'Networking', count: 68 },
@@ -65,97 +69,30 @@ export class ProductCatalogComponent {
     { name: 'Enterprise Servers', count: 51 }
   ];
 
-  // Mock Enterprise Dataset
-  private readonly rawProducts = signal<ProductItem[]>([
-    {
-      id: 'prod-001',
-      name: 'OmniGateway Enterprise X1 Edge Hub',
-      sku: 'OGW-EDG-9021',
-      category: 'Networking',
-      price: 1249.00,
-      stock: 48,
-      stockStatus: 'in_stock',
-      imageUrl: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=100&h=100&fit=crop&q=80',
-      updatedAt: '2026-10-24 14:20'
-    },
-    {
-      id: 'prod-002',
-      name: 'TitanWave 10Gbps Managed SFP+ Switch',
-      sku: 'TW-SFP-10G-24P',
-      category: 'Networking',
-      price: 899.50,
-      stock: 6,
-      stockStatus: 'low_stock',
-      imageUrl: 'https://images.unsplash.com/photo-1588508065123-287b28e013da?w=100&h=100&fit=crop&q=80',
-      updatedAt: '2026-10-24 11:05'
-    },
-    {
-      id: 'prod-003',
-      name: 'AeroThermal Multi-Sensor Array IP67',
-      sku: 'ATA-SEN-IP67',
-      category: 'Wearables & IoT',
-      price: 349.00,
-      stock: 0,
-      stockStatus: 'out_of_stock',
-      imageUrl: 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=100&h=100&fit=crop&q=80',
-      updatedAt: '2026-10-23 18:44'
-    },
-    {
-      id: 'prod-004',
-      name: 'OptiCore 2U Rackmount Dual Xeon Server',
-      sku: 'OC-2U-XEON-96C',
-      category: 'Enterprise Servers',
-      price: 3899.00,
-      stock: 14,
-      stockStatus: 'in_stock',
-      imageUrl: 'https://images.unsplash.com/photo-1591488320449-011701bb6704?w=100&h=100&fit=crop&q=80',
-      updatedAt: '2026-10-24 09:12'
-    },
-    {
-      id: 'prod-005',
-      name: 'QuantumPoint Industrial Laser Scanner',
-      sku: 'QP-LSR-SCAN-4K',
-      category: 'Industrial Hardware',
-      price: 1540.00,
-      stock: 32,
-      stockStatus: 'in_stock',
-      imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=100&h=100&fit=crop&q=80',
-      updatedAt: '2026-10-22 16:30'
-    },
-    {
-      id: 'prod-006',
-      name: 'CipherLock HSM Crypto Key Accelerator',
-      sku: 'CLK-HSM-PCI-E5',
-      category: 'Electronics',
-      price: 2199.00,
-      stock: 5,
-      stockStatus: 'low_stock',
-      imageUrl: 'https://images.unsplash.com/photo-1563770660941-20978e870e26?w=100&h=100&fit=crop&q=80',
-      updatedAt: '2026-10-24 08:15'
-    },
-    {
-      id: 'prod-007',
-      name: 'VortexPulse 32-Channel PoE Controller',
-      sku: 'VP-POE-32CH-UL',
-      category: 'Networking',
-      price: 649.99,
-      stock: 112,
-      stockStatus: 'in_stock',
-      imageUrl: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=100&h=100&fit=crop&q=80',
-      updatedAt: '2026-10-21 20:00'
-    }
-  ]);
+  // 7. Base Dataset (Used as default / fallback when API is connecting)
+  private readonly fallbackCatalog: ProductItem[] = [];
 
-  // Filtered & Sorted Products
+  // Server response store
+  readonly productsList = signal<ProductItem[]>(this.fallbackCatalog);
+  readonly serverTotalCount = signal<number>(this.fallbackCatalog.length);
+  readonly isApiConnected = signal<boolean>(false);
+
+  // Filtered & Sorted Display Products
   readonly filteredProducts = computed(() => {
-    let list = this.rawProducts();
+    // If connected to API, the server already sorts and paginates
+    if (this.isApiConnected()) {
+      return this.productsList();
+    }
+
+    // Client-side fallback computation
+    let list = this.productsList();
     const query = this.searchQuery().toLowerCase().trim();
     const cats = this.selectedCategories();
     const price = this.priceRange();
 
     if (query) {
-      list = list.filter(p => 
-        p.name.toLowerCase().includes(query) || 
+      list = list.filter(p =>
+        p.name.toLowerCase().includes(query) ||
         p.sku.toLowerCase().includes(query) ||
         p.category.toLowerCase().includes(query)
       );
@@ -167,12 +104,11 @@ export class ProductCatalogComponent {
 
     list = list.filter(p => p.price >= price.min && p.price <= price.max);
 
-    // Sorting
-    const field = this.sortField();
+    const field = this.sortField() as keyof ProductItem;
     const dir = this.sortDirection() === 'asc' ? 1 : -1;
     return [...list].sort((a, b) => {
-      const valA = a[field];
-      const valB = b[field];
+      const valA = a[field] ?? '';
+      const valB = b[field] ?? '';
       if (typeof valA === 'string') {
         return (valA as string).localeCompare(valB as string) * dir;
       }
@@ -180,7 +116,9 @@ export class ProductCatalogComponent {
     });
   });
 
-  readonly totalRecordsCount = computed(() => this.filteredProducts().length);
+  readonly totalRecordsCount = computed(() => {
+    return this.isApiConnected() ? this.serverTotalCount() : this.filteredProducts().length;
+  });
 
   readonly isAllSelected = computed(() => {
     const list = this.filteredProducts();
@@ -188,32 +126,79 @@ export class ProductCatalogComponent {
     return list.every(p => this.selectedRowIds().has(p.id));
   });
 
-  // Action methods
-  toggleFilterDock() {
-    this.isFilterDockOpen.update(v => !v);
+  ngOnInit(): void {
+    this.fetchCatalogData();
   }
 
-  toggleCategory(cat: string) {
-    this.selectedCategories.update(list => {
-      return list.includes(cat) ? list.filter(c => c !== cat) : [...list, cat];
+  // Fetch catalog data from backend API with graceful fallback
+  public fetchCatalogData(): void {
+    const activeFilters: ProductFilters = {
+      searchTerm: this.searchQuery(),
+      sortBy: String(this.sortField()),
+      sortOrder: this.sortDirection(),
+      pageNumber: this.currentPage(),
+      pageSize: this.pageSize(),
+      minPrice: this.priceRange().min,
+      maxPrice: this.priceRange().max,
+      categories: this.selectedCategories()
+    };
+
+    this.productService.getProducts(activeFilters).subscribe({
+      next: (response: PaginatedResponse<ProductItem>) => {
+        if (response && Array.isArray(response.items)) {
+          this.productsList.set(response.items);
+          this.serverTotalCount.set(response.totalCount);
+          this.isApiConnected.set(true);
+        }
+      },
+      error: (err) => {
+        // Backend not online or returned error: keep UI fully functional with fallback catalog
+        console.warn('Catalog API unreachable (using offline preview mode):', err?.message || err);
+        this.isApiConnected.set(false);
+      }
     });
   }
 
-  updatePriceRange(field: 'min' | 'max', event: Event) {
-    const value = +(event.target as HTMLInputElement).value;
-    this.priceRange.update(r => ({ ...r, [field]: value }));
-  }
-
-  handleSort(field: keyof ProductItem) {
+  // Sorting
+  public handleSort(field: keyof ProductItem | string): void {
     if (this.sortField() === field) {
       this.sortDirection.update(d => d === 'asc' ? 'desc' : 'asc');
     } else {
       this.sortField.set(field);
       this.sortDirection.set('asc');
     }
+    this.fetchCatalogData();
   }
 
-  toggleSelectAll() {
+  public changeSort(columnName: string): void {
+    this.handleSort(columnName);
+  }
+
+  // Pagination
+  public changePage(newPage: number): void {
+    this.currentPage.set(newPage);
+    this.fetchCatalogData();
+  }
+
+  // Dock & Filter actions
+  public toggleFilterDock(): void {
+    this.isFilterDockOpen.update(v => !v);
+  }
+
+  public toggleCategory(cat: string): void {
+    this.selectedCategories.update(list => {
+      return list.includes(cat) ? list.filter(c => c !== cat) : [...list, cat];
+    });
+    this.fetchCatalogData();
+  }
+
+  public updatePriceRange(field: 'min' | 'max', event: Event): void {
+    const value = +(event.target as HTMLInputElement).value;
+    this.priceRange.update(r => ({ ...r, [field]: value }));
+  }
+
+  // Row Selection
+  public toggleSelectAll(): void {
     if (this.isAllSelected()) {
       this.selectedRowIds.set(new Set<string>());
     } else {
@@ -221,7 +206,7 @@ export class ProductCatalogComponent {
     }
   }
 
-  toggleSelectRow(id: string) {
+  public toggleSelectRow(id: string): void {
     this.selectedRowIds.update(set => {
       const next = new Set(set);
       if (next.has(id)) {
@@ -233,7 +218,8 @@ export class ProductCatalogComponent {
     });
   }
 
-  openCreateDrawer() {
+  // Action Drawer
+  public openCreateDrawer(): void {
     this.drawerMode.set('create');
     this.productForm.reset({
       category: 'Electronics',
@@ -243,7 +229,7 @@ export class ProductCatalogComponent {
     this.isDrawerOpen.set(true);
   }
 
-  openEditDrawer(prod: ProductItem) {
+  public openEditDrawer(prod: ProductItem): void {
     this.drawerMode.set('edit');
     this.productForm.setValue({
       name: prod.name,
@@ -256,16 +242,16 @@ export class ProductCatalogComponent {
     this.isDrawerOpen.set(true);
   }
 
-  closeDrawer() {
+  public closeDrawer(): void {
     this.isDrawerOpen.set(false);
   }
 
-  deleteProduct(prod: ProductItem, event: MouseEvent) {
+  public deleteProduct(prod: ProductItem, event: MouseEvent): void {
     event.stopPropagation();
-    this.rawProducts.update(list => list.filter(p => p.id !== prod.id));
+    this.productsList.update(list => list.filter(p => p.id !== prod.id));
   }
 
-  saveProduct() {
+  public saveProduct(): void {
     if (this.productForm.invalid) {
       this.productForm.markAllAsTouched();
       return;
@@ -283,23 +269,23 @@ export class ProductCatalogComponent {
         imageUrl: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=100&h=100&fit=crop&q=80',
         updatedAt: 'Just now'
       };
-      this.rawProducts.update(list => [newProd, ...list]);
+      this.productsList.update(list => [newProd, ...list]);
     }
     this.closeDrawer();
   }
 
-  // Drag and drop handlers
-  onDragOver(e: DragEvent) {
+  // Drag and Drop
+  public onDragOver(e: DragEvent): void {
     e.preventDefault();
     this.isDraggingOver.set(true);
   }
 
-  onDragLeave(e: DragEvent) {
+  public onDragLeave(e: DragEvent): void {
     e.preventDefault();
     this.isDraggingOver.set(false);
   }
 
-  onDrop(e: DragEvent) {
+  public onDrop(e: DragEvent): void {
     e.preventDefault();
     this.isDraggingOver.set(false);
     if (e.dataTransfer?.files.length) {
@@ -312,7 +298,7 @@ export class ProductCatalogComponent {
     }
   }
 
-  clearUploadedFile() {
+  public clearUploadedFile(): void {
     this.uploadedFile.set(null);
   }
 }
