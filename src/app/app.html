@@ -1,0 +1,55 @@
+<div class="omni-app-shell">
+  <!-- Global Enterprise App Bar -->
+  <nav class="omni-global-navbar">
+    <div class="nav-brand-section">
+      <a routerLink="/" class="nav-brand-link">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L2 7.5L12 13L22 7.5L12 2Z" fill="#818CF8"/>
+            <path d="M2 12L12 17.5L22 12" stroke="#6366F1" stroke-width="2" stroke-linecap="round"/>
+            <path d="M2 16.5L12 22L22 16.5" stroke="#38BDF8" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="brand-text">OmniMarket</span>
+      </a>
+      <span class="environment-badge">ENTERPRISE v2.4</span>
+    </div>
+
+    <!-- Rapid Route Navigation for 5 Core Views -->
+    <div class="nav-links-row">
+      <a routerLink="/login" routerLinkActive="active" class="nav-route-link">
+        <span class="route-num">01</span>
+        <span>Gateway Portal</span>
+      </a>
+      <a routerLink="/dashboard/products" routerLinkActive="active" class="nav-route-link">
+        <span class="route-num">02</span>
+        <span>Product Catalog</span>
+      </a>
+      <a routerLink="/dashboard/security" routerLinkActive="active" class="nav-route-link">
+        <span class="route-num">03</span>
+        <span>Security Center</span>
+      </a>
+      <a routerLink="/dashboard/logs" routerLinkActive="active" class="nav-route-link">
+        <span class="route-num">04</span>
+        <span>Activity Logs</span>
+      </a>
+      <a routerLink="/forbidden" routerLinkActive="active" class="nav-route-link">
+        <span class="route-num">05</span>
+        <span>Fallbacks (401/403/404)</span>
+      </a>
+    </div>
+
+    <div class="nav-user-profile">
+      <div class="user-avatar-badge">AD</div>
+      <div class="user-meta">
+        <span class="user-name">Alex Drake</span>
+        <span class="user-role">SuperAdmin</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- View Outlet -->
+  <main class="omni-main-view">
+    <router-outlet></router-outlet>
+  </main>
+</div>

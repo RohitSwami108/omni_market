@@ -1,0 +1,198 @@
+<div class="omni-security-container">
+  
+  <!-- Header Area -->
+  <header class="security-header">
+    <div class="header-left">
+      <div class="header-breadcrumb">
+        <span>Governance &amp; IAM</span>
+        <span class="sep">/</span>
+        <span class="current">Access Control Matrix</span>
+      </div>
+      <h1 class="header-title">Security Command Center</h1>
+      <p class="header-subtitle">
+        Define granular RBAC permission bounds and cluster execution limits across user personas.
+      </p>
+    </div>
+
+    <div class="header-right">
+      <div class="compliance-badge">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path fill-rule="evenodd" d="M8 0c-.69 0-1.843.265-2.928.56-1.11.3-2.229.655-2.887.87a1.54 1.54 0 0 0-1.044 1.262c-.596 4.477.787 7.795 2.464 9.99a11.777 11.777 0 0 0 3.732 3.031c.214.11.45.177.663.177.214 0 .45-.067.663-.177a11.777 11.777 0 0 0 3.732-3.03c1.677-2.196 3.06-5.514 2.464-9.991a1.54 1.54 0 0 0-1.044-1.262c-.658-.216-1.777-.57-2.887-.87C9.843.266 8.69 0 8 0zm2.354 5.646a.5.5 0 0 0-.708-.708L6.5 8.086 5.354 6.94a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0l3.5-3.5z"/>
+        </svg>
+        <span>SOC-2 Policy Enforced</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Horizontal Fluid Profile Tab Switcher -->
+  <nav class="profiles-tab-bar" aria-label="System Profiles">
+    <div class="tabs-slider-rail">
+      @for (profile of profiles(); track profile.id) {
+        <button 
+          type="button" 
+          class="profile-tab-item" 
+          [class.active]="activeProfileId() === profile.id"
+          (click)="selectProfile(profile.id)">
+          <div class="tab-label-group">
+            <span class="tab-name">{{ profile.name }}</span>
+            <span class="tab-badge" [class]="profile.id">{{ profile.badge }}</span>
+          </div>
+          <span class="tab-users-count">{{ profile.activeUsers | number }} active identities</span>
+        </button>
+      }
+    </div>
+  </nav>
+
+  <!-- Active Profile Summary Banner -->
+  <div class="active-profile-banner">
+    <div class="banner-info">
+      <span class="banner-prefix">Modifying Role Persona:</span>
+      <strong class="banner-role-name">{{ activeProfile().name }}</strong>
+      <span class="banner-desc">— {{ activeProfile().description }}</span>
+    </div>
+    <div class="banner-actions">
+      <button type="button" class="btn-clone-role">Clone Permissions</button>
+      <button type="button" class="btn-audit-role">Audit Access Logs</button>
+    </div>
+  </div>
+
+  <!-- Matrix Permission Group Cards -->
+  <div class="matrix-groups-list">
+    @for (group of groups(); track group.id) {
+      <section class="permission-group-card" [class.collapsed]="!group.expanded">
+        
+        <!-- Collapsible Card Header -->
+        <header class="group-card-header" (click)="toggleGroupExpand(group.id)">
+          <div class="group-left">
+            <button type="button" class="group-toggle-chevron" aria-label="Toggle card">
+              <svg viewBox="0 0 20 20" fill="currentColor" [class.rotated]="group.expanded">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="group-title-group">
+              <h2 class="group-title">{{ group.title }}</h2>
+              <span class="group-count-pill">{{ group.permissions.length }} Operations</span>
+            </div>
+          </div>
+
+          <div class="group-quick-actions" (click)="$event.stopPropagation()">
+            <button type="button" class="quick-btn" (click)="toggleAllInGroup(group, true)">Grant All</button>
+            <span class="divider">|</span>
+            <button type="button" class="quick-btn" (click)="toggleAllInGroup(group, false)">Revoke All</button>
+          </div>
+        </header>
+
+        <!-- Permission Matrix Table -->
+        @if (group.expanded) {
+          <div class="matrix-table-container">
+            <table class="matrix-table">
+              <thead>
+                <tr>
+                  <th class="th-operation">Operation Code &amp; Function</th>
+                  <th class="th-scope">Execution Scope</th>
+                  <th class="th-toggle text-center">Read / Query</th>
+                  <th class="th-toggle text-center">Write / Modify</th>
+                  <th class="th-toggle text-center">Delete / Revoke</th>
+                  <th class="th-toggle text-center">Admin Override</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (perm of group.permissions; track perm.key) {
+                  <tr class="matrix-row">
+                    <!-- Operation Key & Desc -->
+                    <td class="td-operation">
+                      <div class="op-cell">
+                        <span class="op-code">{{ perm.name }}</span>
+                        <span class="op-desc">{{ perm.description }}</span>
+                      </div>
+                    </td>
+
+                    <!-- Scope Tag -->
+                    <td class="td-scope">
+                      <span class="scope-tag" [class]="perm.scope.toLowerCase().replace(' ', '-')">
+                        {{ perm.scope }}
+                      </span>
+                    </td>
+
+                    <!-- Read Toggle -->
+                    <td class="td-toggle text-center">
+                      <label class="matrix-switch">
+                        <input 
+                          type="checkbox" 
+                          [checked]="perm.canRead"
+                          (change)="togglePermission(group.id, perm.key, 'canRead')">
+                        <span class="switch-slider"></span>
+                      </label>
+                    </td>
+
+                    <!-- Write Toggle -->
+                    <td class="td-toggle text-center">
+                      <label class="matrix-switch">
+                        <input 
+                          type="checkbox" 
+                          [checked]="perm.canWrite"
+                          (change)="togglePermission(group.id, perm.key, 'canWrite')">
+                        <span class="switch-slider"></span>
+                      </label>
+                    </td>
+
+                    <!-- Delete Toggle -->
+                    <td class="td-toggle text-center">
+                      <label class="matrix-switch switch-danger">
+                        <input 
+                          type="checkbox" 
+                          [checked]="perm.canDelete"
+                          (change)="togglePermission(group.id, perm.key, 'canDelete')">
+                        <span class="switch-slider"></span>
+                      </label>
+                    </td>
+
+                    <!-- Admin Override Toggle -->
+                    <td class="td-toggle text-center">
+                      <label class="matrix-switch switch-admin">
+                        <input 
+                          type="checkbox" 
+                          [checked]="perm.canAdmin"
+                          (change)="togglePermission(group.id, perm.key, 'canAdmin')">
+                        <span class="switch-slider"></span>
+                      </label>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+      </section>
+    }
+  </div>
+
+  <!-- Floating Sticky Command Bar -->
+  @if (hasUnsavedChanges()) {
+    <aside class="floating-command-dock" role="region" aria-label="Unsaved configuration actions">
+      <div class="command-dock-content">
+        <div class="status-indicator">
+          <span class="unsaved-pulse-dot"></span>
+          <span class="unsaved-label">
+            <strong>{{ unsavedCount() }} pending changes</strong> staged for {{ activeProfile().name }}
+          </span>
+        </div>
+
+        <div class="command-actions">
+          <button type="button" class="btn-command-reset" (click)="resetConfiguration()">
+            Reset Configuration
+          </button>
+          <button type="button" class="btn-command-save" (click)="saveConfiguration()">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+            <span>Save &amp; Deploy Policy</span>
+            <kbd class="shortcut-badge">⌘S</kbd>
+          </button>
+        </div>
+      </div>
+    </aside>
+  }
+
+</div>

@@ -1,0 +1,198 @@
+<div class="omni-fallback-wrapper">
+  
+  <!-- Interactive View Switcher Bar (For previewing all three disruption states) -->
+  <div class="fallback-preview-switcher">
+    <span class="switcher-label">Select Restriction State Preview:</span>
+    <div class="switcher-pills">
+      <button 
+        type="button" 
+        class="pill-btn" 
+        [class.active]="activeView() === '403'"
+        (click)="setView('403')">
+        403 Access Denied
+      </button>
+      <button 
+        type="button" 
+        class="pill-btn" 
+        [class.active]="activeView() === '401'"
+        (click)="setView('401')">
+        401 Session Intercept
+      </button>
+      <button 
+        type="button" 
+        class="pill-btn" 
+        [class.active]="activeView() === '404'"
+        (click)="setView('404')">
+        404 Not Found
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       VIEW 5A: 403 ACCESS DENIED
+       ========================================================================= -->
+  @if (activeView() === '403') {
+    <div class="fallback-stage" role="main" aria-labelledby="status-403-title">
+      <div class="disruption-card">
+        
+        <!-- Glowing Security Illustration -->
+        <div class="illustration-orb orb-danger">
+          <div class="orb-halo"></div>
+          <svg class="orb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+
+        <div class="card-status-badge badge-403">HTTP 403 • RESTRICTED REALM</div>
+        <h1 id="status-403-title" class="card-heading">Security Exclusion Zone</h1>
+        
+        <p class="card-description">
+          Your current enterprise authorization profile does not grant execution privileges for this tenant endpoint.
+        </p>
+
+        <!-- Identity & Permission Metadata Context -->
+        <div class="security-context-box">
+          <div class="context-item">
+            <span class="ctx-label">Identity Subject:</span>
+            <span class="ctx-val font-mono">marcus.v@gearlogix.com</span>
+          </div>
+          <div class="context-item">
+            <span class="ctx-label">Assigned Role:</span>
+            <span class="ctx-val"><span class="role-tag">Vendor Partner</span></span>
+          </div>
+          <div class="context-item">
+            <span class="ctx-label">Required Capability:</span>
+            <span class="ctx-val font-mono text-danger">cluster:admin:mutate</span>
+          </div>
+        </div>
+
+        <!-- Navigation CTAs -->
+        <div class="card-actions-row">
+          <button type="button" class="btn-primary-safe">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+            </svg>
+            <span>Return to Workspace Safety</span>
+          </button>
+          <button type="button" class="btn-secondary-escalate">
+            Request Privilege Escalation
+          </button>
+        </div>
+
+        <footer class="card-foot-assurance">
+          <span>Security Audit Incident Ref: <code>SEC-403-99824-TX</code></span>
+        </footer>
+
+      </div>
+    </div>
+  }
+
+  <!-- =========================================================================
+       VIEW 5B: 401 SESSION INTERCEPT MODAL OVERLAY
+       ========================================================================= -->
+  @if (activeView() === '401') {
+    <div class="modal-backdrop-interceptor" role="dialog" aria-modal="true" aria-labelledby="status-401-title">
+      <div class="intercept-modal-box">
+        
+        <!-- Subtle Infinite Progress Orbital Loop -->
+        <div class="orbital-spinner-container">
+          <div class="orbital-ring ring-outer"></div>
+          <div class="orbital-ring ring-inner"></div>
+          <div class="orbital-center-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="modal-text-group">
+          <span class="auth-intercept-tag">ZERO-TRUST PROTOCOL</span>
+          <h2 id="status-401-title" class="intercept-title">Refreshing Hardware Session</h2>
+          <p class="intercept-body">
+            Your OAuth 2.0 PKCE cryptographic ticket is actively rotating in the background. Synchronizing authentication tokens with hardware security modules...
+          </p>
+        </div>
+
+        <!-- Infinite Indeterminate Progress Bar -->
+        <div class="indeterminate-progress-track">
+          <div class="indeterminate-progress-bar"></div>
+        </div>
+
+        <div class="session-timer-row">
+          <span class="timer-text">Timeout fallback threshold: <strong>{{ sessionTimeRemaining() }}s</strong></span>
+        </div>
+
+        <!-- Manual Re-Authenticate Trigger Fallback -->
+        <div class="intercept-footer-actions">
+          <button 
+            type="button" 
+            class="btn-reauth-fallback" 
+            [disabled]="isRetryingAuth()"
+            (click)="retryAuthentication()">
+            @if (isRetryingAuth()) {
+              <span class="mini-spinner"></span>
+              <span>Re-authenticating Identity...</span>
+            } @else {
+              <span>Session Stalled? Re-Authenticate Now</span>
+            }
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- =========================================================================
+       VIEW 5C: 404 NOT FOUND DISRUPTION VIEW
+       ========================================================================= -->
+  @if (activeView() === '404') {
+    <div class="fallback-stage" role="main" aria-labelledby="status-404-title">
+      <div class="disruption-card">
+        
+        <!-- Illustration -->
+        <div class="illustration-orb orb-info">
+          <div class="orb-halo"></div>
+          <svg class="orb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+
+        <div class="card-status-badge badge-404">HTTP 404 • UNRESOLVED ROUTE</div>
+        <h1 id="status-404-title" class="card-heading">Endpoint Cannot Be Located</h1>
+        
+        <p class="card-description">
+          The requested inventory asset, catalog node, or routing path has been relocated or decommissioned.
+        </p>
+
+        <div class="path-diagnostic-chip">
+          <span class="method">TARGET:</span>
+          <code>/dashboard/catalog/archived-nodes/prod-99201</code>
+        </div>
+
+        <!-- Quick Links Grid -->
+        <div class="quick-links-trio">
+          <button type="button" class="quick-nav-card">
+            <span class="nav-title">Products Catalog</span>
+            <span class="nav-hint">Return to inventory grid</span>
+          </button>
+          <button type="button" class="quick-nav-card">
+            <span class="nav-title">Security Center</span>
+            <span class="nav-hint">Roles &amp; permissions</span>
+          </button>
+          <button type="button" class="quick-nav-card">
+            <span class="nav-title">System Logs</span>
+            <span class="nav-hint">Inspect request tracing</span>
+          </button>
+        </div>
+
+        <div class="card-actions-row">
+          <button type="button" class="btn-primary-safe">
+            <span>Back to Main Dashboard</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+</div>
