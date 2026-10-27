@@ -23,7 +23,9 @@ export class ProductService {
         }
       }
     });
-
     return this.http.get<PaginatedResponse<ProductItem>>(this.apiEndPoint, { params });
+  }
+  public deleteProduct(id: string): Observable<any> {
+    return this.http.delete(`${this.apiEndPoint}/${id}`);
   }
 }

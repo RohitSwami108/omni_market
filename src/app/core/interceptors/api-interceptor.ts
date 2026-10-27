@@ -1,21 +1,19 @@
 import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { AuthService } from '../services/auth';
 
 export const apiInterceptor: HttpInterceptorFn = (req, next) => {
   const baseUrl = 'https://localhost:7237';
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const authService = inject(AuthService);
+  const token = authService.token();
 
-  let targetUrl = req.url;
-  if (!req.url.startsWith('http://') && !req.url.startsWith('https://')) {
-    if (req.url.startsWith('/api/')) {
-      targetUrl = `${baseUrl}${req.url}`;
-    } else if (req.url.startsWith('api/')) {
-      targetUrl = `${baseUrl}/${req.url}`;
-    } else {
-      targetUrl = `${baseUrl}/api/${req.url.replace(/^\/+/, '')}`;
-    }
-  }
+  const formattedUrl = req.url.startsWith('http')
+    ? req.url
+    : `${baseUrl}${req.url.startsWith('/') ? '' : '/'}${req.url}`;
 
-  let clonedRequest = req.clone({ url: targetUrl });
+  let clonedRequest = req.clone({
+    url: formattedUrl
+  });
 
   if (token) {
     clonedRequest = clonedRequest.clone({
@@ -24,6 +22,5 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
       }
     });
   }
-
   return next(clonedRequest);
 };

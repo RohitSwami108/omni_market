@@ -1,7 +1,9 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InputErrorComponent } from '../../shared/components/input-error/input-error.component';
+import { AuthService } from '../../core/services/auth';
+import { Router } from 'express';
 
 @Component({
   selector: 'app-auth-portal',
@@ -12,6 +14,8 @@ import { InputErrorComponent } from '../../shared/components/input-error/input-e
 })
 export class AuthPortalComponent {
   // Signals for view switching & UI states
+  readonly authService = inject(AuthService);
+  readonly router = inject(Router);
   readonly isRegisterMode = signal<boolean>(false);
   readonly showPassword = signal<boolean>(false);
   readonly showConfirmPassword = signal<boolean>(false);
@@ -28,7 +32,7 @@ export class AuthPortalComponent {
     fullName: new FormControl('', [Validators.required, Validators.minLength(3)]),
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [Validators.required, Validators.minLength(8)]),
-    confirmPassword: new FormControl('', [Validators.required]),
+    // confirmPassword: new FormControl('', [Validators.required]),
     agreeTerms: new FormControl(false, [Validators.requiredTrue])
   });
 
@@ -66,9 +70,17 @@ export class AuthPortalComponent {
       return;
     }
     this.isSubmitting.set(true);
-    setTimeout(() => {
-      this.isSubmitting.set(false);
-    }, 1200);
+    this.authService.login(this.loginForm.value).subscribe({
+      next: (res) => {
+        this.isSubmitting.set(false);
+        this.router.navigate(['/dashboard/products'])
+        console.log(res)
+        debugger
+      },
+      error: (err: any) => {
+        this.isSubmitting.set(false);
+      }
+    })
   }
 
   handleRegisterSubmit() {
@@ -77,8 +89,14 @@ export class AuthPortalComponent {
       return;
     }
     this.isSubmitting.set(true);
-    setTimeout(() => {
-      this.isSubmitting.set(false);
-    }, 1200);
+    this.authService.register(this.registerForm.value).subscribe({
+      next: (res) => {
+        console.log(res)
+        debugger
+      },
+      error: (err: any) => {
+        this.isSubmitting.set(false);
+      }
+    })
   }
 }

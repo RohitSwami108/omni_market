@@ -3,7 +3,6 @@
   <aside class="auth-marketing-pane">
     <div class="marketing-bg-glow"></div>
     <div class="marketing-grid-pattern"></div>
-
     <div class="marketing-header">
       <div class="brand-badge">
         <div class="brand-logo-icon">
@@ -96,20 +95,8 @@
       <!-- Top Switcher -->
       <div class="auth-switcher-container">
         <div class="auth-switcher-rail">
-          <button 
-            type="button" 
-            class="switch-tab" 
-            [class.active]="!isRegisterMode()"
-            (click)="toggleMode(false)">
-            Sign In
-          </button>
-          <button 
-            type="button" 
-            class="switch-tab" 
-            [class.active]="isRegisterMode()"
-            (click)="toggleMode(true)">
-            Create Account
-          </button>
+          <button type="button" class="switch-tab" [class.active]="!isRegisterMode()" (click)="toggleMode(false)"> Sign In </button>
+          <button type="button" class="switch-tab" [class.active]="isRegisterMode()" (click)="toggleMode(true)"> Create Account </button>
           <div class="slider-indicator" [class.slide-right]="isRegisterMode()"></div>
         </div>
       </div>
@@ -158,18 +145,9 @@
                     <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
                     <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
                   </svg>
-                  <input 
-                    id="login-email"
-                    type="email" 
-                    formControlName="email"
-                    class="form-input" 
-                    placeholder="name@company.com"
-                    autocomplete="email">
+                  <input id="login-email" type="email" formControlName="email" class="form-input" placeholder="name@company.com" autocomplete="email">
                 </div>
-                <app-input-error 
-                  [control]="loginForm.controls.email"
-                  fieldLabel="Enterprise Email">
-                </app-input-error>
+                <app-input-error [control]="loginForm.controls.email" fieldLabel="Enterprise Email"> </app-input-error>
               </div>
 
               <!-- Password -->
@@ -182,18 +160,8 @@
                   <svg class="input-icon" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
                   </svg>
-                  <input 
-                    id="login-password"
-                    [type]="showPassword() ? 'text' : 'password'" 
-                    formControlName="password"
-                    class="form-input" 
-                    placeholder="••••••••••••"
-                    autocomplete="current-password">
-                  <button 
-                    type="button" 
-                    class="toggle-eye" 
-                    (click)="togglePasswordVisibility('password')"
-                    aria-label="Toggle password visibility">
+                  <input id="login-password" [type]="showPassword() ? 'text' : 'password'" formControlName="password" class="form-input" placeholder="••••••••••••" autocomplete="current-password">
+                  <button type="button" class="toggle-eye" (click)="togglePasswordVisibility('password')" aria-label="Toggle password visibility">
                     @if (showPassword()) {
                       <svg viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd" />
@@ -207,10 +175,7 @@
                     }
                   </button>
                 </div>
-                <app-input-error 
-                  [control]="loginForm.controls.password"
-                  fieldLabel="Password">
-                </app-input-error>
+                <app-input-error [control]="loginForm.controls.password" fieldLabel="Password"> </app-input-error>
               </div>
 
               <!-- Options -->
@@ -223,10 +188,7 @@
               </div>
 
               <!-- Submit CTA -->
-              <button 
-                type="submit" 
-                class="primary-submit-btn" 
-                [disabled]="isSubmitting()">
+              <button type="submit" class="primary-submit-btn" [disabled]="isSubmitting()">
                 @if (isSubmitting()) {
                   <span class="btn-spinner"></span>
                   <span>Verifying Credentials...</span>
@@ -248,9 +210,7 @@
               <h2 class="panel-title">Start with OmniMarket Enterprise</h2>
               <p class="panel-subtitle">14-day dedicated sandbox access with live API access keys.</p>
             </div>
-
-            <form [formGroup]="registerForm" (ngSubmit)="handleRegisterSubmit()" class="auth-form" novalidate>
-              
+            <form [formGroup]="registerForm" (ngSubmit)="handleRegisterSubmit()" class="auth-form" novalidate>              
               <!-- Full Name -->
               <div class="form-group">
                 <label for="reg-name" class="form-label">Full Name</label>
@@ -258,18 +218,9 @@
                   <svg class="input-icon" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
                   </svg>
-                  <input 
-                    id="reg-name"
-                    type="text" 
-                    formControlName="fullName"
-                    class="form-input" 
-                    placeholder="Sarah Jenkins"
-                    autocomplete="name">
+                  <input id="reg-name" type="text" formControlName="fullName" class="form-input" placeholder="Sarah Jenkins" autocomplete="name">
                 </div>
-                <app-input-error 
-                  [control]="registerForm.controls.fullName"
-                  fieldLabel="Full Name">
-                </app-input-error>
+                <app-input-error [control]="registerForm.controls.fullName" fieldLabel="Full Name"> </app-input-error>
               </div>
 
               <!-- Work Email -->
@@ -280,18 +231,9 @@
                     <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
                     <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
                   </svg>
-                  <input 
-                    id="reg-email"
-                    type="email" 
-                    formControlName="email"
-                    class="form-input" 
-                    placeholder="s.jenkins@enterprise.com"
-                    autocomplete="email">
+                  <input id="reg-email" type="email" formControlName="email" class="form-input" placeholder="s.jenkins@enterprise.com" autocomplete="email">
                 </div>
-                <app-input-error 
-                  [control]="registerForm.controls.email"
-                  fieldLabel="Business Email">
-                </app-input-error>
+                <app-input-error [control]="registerForm.controls.email" fieldLabel="Business Email"> </app-input-error>
               </div>
 
               <!-- Password -->
@@ -301,17 +243,8 @@
                   <svg class="input-icon" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
                   </svg>
-                  <input 
-                    id="reg-password"
-                    [type]="showPassword() ? 'text' : 'password'" 
-                    formControlName="password"
-                    class="form-input" 
-                    placeholder="Min 8 chars, uppercase & symbols">
-                  <button 
-                    type="button" 
-                    class="toggle-eye" 
-                    (click)="togglePasswordVisibility('password')"
-                    aria-label="Toggle password visibility">
+                  <input id="reg-password" [type]="showPassword() ? 'text' : 'password'" formControlName="password" class="form-input" placeholder="Min 8 chars, uppercase & symbols">
+                  <button type="button" class="toggle-eye" (click)="togglePasswordVisibility('password')" aria-label="Toggle password visibility">
                     @if (showPassword()) {
                       <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd" /><path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.064 7 9.542 7 .847 0 1.669-.105 2.454-.303z" /></svg>
                     } @else {
@@ -331,10 +264,7 @@
                   <span class="strength-label">Security: {{ passwordStrength().label }}</span>
                 </div>
 
-                <app-input-error 
-                  [control]="registerForm.controls.password"
-                  fieldLabel="Master Password">
-                </app-input-error>
+                <app-input-error [control]="registerForm.controls.password" fieldLabel="Master Password"> </app-input-error>
               </div>
 
               <!-- Terms Checkbox -->
@@ -346,17 +276,11 @@
                     I agree to the <a href="javascript:void(0)" class="terms-link">Master Services Agreement</a> and <a href="javascript:void(0)" class="terms-link">Privacy Policy</a>
                   </span>
                 </label>
-                <app-input-error 
-                  [control]="registerForm.controls.agreeTerms"
-                  customMessage="You must accept the enterprise terms to proceed.">
-                </app-input-error>
+                <app-input-error [control]="registerForm.controls.agreeTerms" customMessage="You must accept the enterprise terms to proceed."> </app-input-error>
               </div>
 
               <!-- Submit CTA -->
-              <button 
-                type="submit" 
-                class="primary-submit-btn" 
-                [disabled]="isSubmitting()">
+              <button type="submit" class="primary-submit-btn" [disabled]="isSubmitting()">
                 @if (isSubmitting()) {
                   <span class="btn-spinner"></span>
                   <span>Provisioning Workspace...</span>
@@ -382,7 +306,6 @@
           <span>End-to-End TLS 1.3 Encryption • FIPS 140-3 Hardware Protection</span>
         </div>
       </footer>
-
     </div>
   </main>
 </div>
