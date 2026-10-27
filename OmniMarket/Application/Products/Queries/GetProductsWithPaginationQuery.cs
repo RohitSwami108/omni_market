@@ -1,6 +1,8 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using OmniMarket.Application.Common;
 using OmniMarket.Application.Products.DTOs;
+using OmniMarket.Infrastructure.Persistence;
 namespace OmniMarket.Application.Products.Queries;
 
 public record GetProductsWithPaginationQuery(
@@ -14,35 +16,51 @@ public record GetProductsWithPaginationQuery(
     int PageSize = 1
     ) : IRequest<PaginationList<ProductDto>>;
 
-public class GetProductsWithPaginationQueryHandler : IRequestHandler<GetProductsWithPaginationQuery, PaginationList<ProductDto>> {
-    public async Task<PaginationList<ProductDto>> Handle(GetProductsWithPaginationQuery request, CancellationToken cancellationToken) {
-        var mockDatabase = new List<ProductDto> {
-            new() { Id = Guid.NewGuid(), Name = "Wireless Mouse", SKU = "TECH-MSE-001", Price = 25.99m, Stock = 50, CategoryId = Guid.NewGuid() },
-            new() { Id = Guid.NewGuid(), Name = "Mechanical Keyboard", SKU = "TECH-KBD-002", Price = 89.99m, Stock = 15, CategoryId = Guid.NewGuid() },
-            new() { Id = Guid.NewGuid(), Name = "Leather Office Chair", SKU = "FURN-CHR-044", Price = 199.99m, Stock = 8, CategoryId = Guid.NewGuid() }
-        }.AsQueryable();
-        if (string.IsNullOrWhiteSpace(request.SearchTerm)) {
-            mockDatabase = mockDatabase.Where(p =>
-                p.Name.Contains(request.SearchTerm ?? "", StringComparison.OrdinalIgnoreCase) ||
-                p.SKU.Contains(request.SearchTerm ?? "", StringComparison.OrdinalIgnoreCase));
+
+public class GetProductsWithPaginationQueryHandler: IRequestHandler<GetProductsWithPaginationQuery,PaginationList<ProductDto>> {
+    private readonly ApplicationDbContext _context;
+    public GetProductsWithPaginationQueryHandler(ApplicationDbContext context) {
+        _context = context;
+    }
+    public async Task<PaginationList<ProductDto>> Handle(GetProductsWithPaginationQuery request,CancellationToken cancellationToken) {
+        var query = _context.Products.AsNoTracking();
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm)) {
+            var term = $"%{request.SearchTerm.Trim()}%";
+            query = query.Where(p =>EF.Functions.Like(p.Name, term) || EF.Functions.Like(p.SKU, term));
         }
-        if(request.MinPrice.HasValue) {
-            mockDatabase = mockDatabase.Where(p => p.Price >= request.MinPrice.Value);
+        if (request.CategoryId.HasValue) {
+            query = query.Where(p => p.CategoryId == request.CategoryId.Value);
+        }
+        if (request.MinPrice.HasValue) {
+            query = query.Where(p => p.Price >= request.MinPrice.Value);
         }
         if (request.MaxPrice.HasValue) {
-            mockDatabase = mockDatabase.Where(p => p.Price <= request.MaxPrice.Value);
+            query = query.Where(p => p.Price <= request.MaxPrice.Value);
         }
-        if (!string.IsNullOrWhiteSpace(request.SortBy)) {
-            bool IsDescending = string.Equals(request.SortOrder, "desc", StringComparison.OrdinalIgnoreCase);
-            mockDatabase = request.SortBy.ToLower() switch {
-                "price" => IsDescending ? mockDatabase.OrderByDescending(p => p.Price) : mockDatabase.OrderBy(p => p.Price),
-                "sku" => IsDescending ? mockDatabase.OrderByDescending(p => p.Price) : mockDatabase.OrderBy(p => p.SKU),
-                _ => IsDescending ? mockDatabase.OrderByDescending(p => p.Name) : mockDatabase.OrderBy(p => p.Name)
-            };
-        }
-        int totalRecords = mockDatabase.Count();
-        var paginatedItems = mockDatabase.Skip((request.PageNumber - 1) * request.PageSize).Take(request.PageSize).ToList();
-        var result = new PaginationList<ProductDto>(paginatedItems, totalRecords, request.PageSize, request.PageSize);
-        return await Task.FromResult(result);
+        var totalRecords = await query.CountAsync(cancellationToken);
+        var descending = string.Equals(request.SortOrder,"desc",StringComparison.OrdinalIgnoreCase);
+        query = (request.SortBy?.ToLowerInvariant(), descending) switch {
+            ("price", true) => query.OrderByDescending(p => p.Price),
+            ("price", false) => query.OrderBy(p => p.Price),
+            ("sku", true) => query.OrderByDescending(p => p.SKU),
+            ("sku", false) => query.OrderBy(p => p.SKU),
+            ("name", true) => query.OrderByDescending(p => p.Name),
+            _ => query.OrderBy(p => p.Name)
+        };
+        var pageNumber = Math.Max(1, request.PageNumber);
+        var pageSize = Math.Clamp(request.PageSize, 1, 100);
+        var products = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(p => new ProductDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                SKU = p.SKU,
+                Price = p.Price,
+                Stock = p.Stock,
+                CategoryId = p.CategoryId
+            }).ToListAsync(cancellationToken);
+        return new PaginationList<ProductDto>(products,totalRecords,pageNumber,pageSize);
     }
 }

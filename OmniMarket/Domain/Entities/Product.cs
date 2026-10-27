@@ -6,7 +6,9 @@
         public decimal Price { get; private set; }
         public int Stock { get; private set; }
         public Guid CategoryId { get; private set; }
+        public Category Category { get; private set; } = null!;
         public string? ImageUrl { get; private set; } // Nullable, as an image is optional
+        protected Product() { }
         public Product(string name,string sku,decimal price,int stock,Guid categoryId,string? imageUrl = null) {
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Product name can not be empty.", nameof(name));
             if (string.IsNullOrWhiteSpace(sku)) throw new ArgumentException("SKU stock keeping unit can not be empty.", nameof(sku));

@@ -21,4 +21,12 @@ public class ProductsController : Controller {
         var result = await _mediator.Send(query);
         return Ok(result);
     }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id) {
+        var isDeleted = await _mediator.Send(new DeleteProductCommand(id));
+        if (!isDeleted) {
+            return NotFound(new { message = $"Product with {id} was not found" });
+        }
+        return NoContent();
+    }
 }

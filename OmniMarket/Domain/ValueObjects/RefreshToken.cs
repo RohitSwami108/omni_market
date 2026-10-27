@@ -6,6 +6,10 @@
         public DateTime? RevokedAt { get; private set; }
         public bool IsExpired => DateTime.UtcNow >= ExpireAt;
         public bool IsActive => RevokedAt == null && !IsExpired;
+        protected RefreshToken () {
+            Token = string.Empty;
+            CreatedById = string.Empty;
+        }
         public RefreshToken(string token, DateTime expireAt, string createdById) {
             if (string.IsNullOrWhiteSpace(token)) throw new ArgumentException("Token value string can not be empty.", nameof(token));
             Token = token;

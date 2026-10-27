@@ -5,6 +5,7 @@ public class ApplicationDbContext : DbContext {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options){ }
     public DbSet<User> Users => Set<User>();
     public DbSet<Product> Products => Set<Product>();
+    public DbSet<Category> Categories => Set<Category>();
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<User>(entity => {
@@ -15,6 +16,11 @@ public class ApplicationDbContext : DbContext {
                 token.WithOwner().HasForeignKey("UserId");
                 token.Property(t => t.Token).IsRequired().HasMaxLength(500);
             });
+        });
+        modelBuilder.Entity<Category>(entity => {
+            entity.HasKey(c => c.Id);
+            entity.Property(c => c.Name).IsRequired().HasMaxLength(100);
+            entity.HasIndex(c => c.Name).IsUnique();
         });
         // Configure Product Entity Mappings
         modelBuilder.Entity<Product>(entity => {
