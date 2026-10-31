@@ -1,0 +1,213 @@
+:host {
+  display: block;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.workspace-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.75rem;
+  background-color: var(--omni-bg-surface, #0f172a);
+  border-bottom: 1px solid var(--omni-border-subtle, rgba(255, 255, 255, 0.08));
+  gap: 1.5rem;
+  z-index: 10;
+  flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+}
+
+.action-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex: 1;
+}
+
+.view-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.view-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.count-chip {
+  padding: 3px 8px;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: var(--omni-radius-full, 9999px);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #818cf8;
+  white-space: nowrap;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 360px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--omni-border-subtle, rgba(255, 255, 255, 0.12));
+  border-radius: var(--omni-radius-md, 10px);
+  padding: 0 12px;
+  transition: all var(--omni-transition-fast);
+
+  &:focus-within {
+    border-color: var(--omni-primary, #6366f1);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
+  }
+
+  .search-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--omni-text-muted, #64748b);
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 8px 0;
+    background: transparent;
+    border: none;
+    font-size: 0.8125rem;
+    color: #ffffff;
+    outline: none;
+
+    &::placeholder {
+      color: #64748b;
+    }
+  }
+
+  .shortcut-tag {
+    font-family: var(--omni-font-mono, monospace);
+    font-size: 0.6875rem;
+    padding: 2px 5px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    color: var(--omni-text-muted, #64748b);
+  }
+}
+
+.filter-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid var(--omni-border-subtle, rgba(255, 255, 255, 0.12));
+  border-radius: var(--omni-radius-md, 10px);
+  color: var(--omni-text-secondary, #94a3b8);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  &.active, &:hover {
+    color: #ffffff;
+    background: rgba(51, 65, 85, 0.8);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .filter-count-badge {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--omni-primary, #6366f1);
+    color: #ffffff;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.action-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bulk-action-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  border-radius: var(--omni-radius-full, 9999px);
+  animation: omni-fade-in 0.2s ease-out;
+
+  .bulk-count {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #818cf8;
+  }
+
+  .bulk-btn {
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+
+    &.bulk-btn-export {
+      color: #e2e8f0;
+      background: rgba(255, 255, 255, 0.08);
+      &:hover { background: rgba(255, 255, 255, 0.15); }
+    }
+
+    &.bulk-btn-danger {
+      color: #f87171;
+      background: rgba(239, 68, 68, 0.15);
+      &:hover { background: rgba(239, 68, 68, 0.25); }
+    }
+  }
+}
+
+.btn-primary-cta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  border-radius: var(--omni-radius-md, 10px);
+  color: #ffffff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
+  transition: all var(--omni-transition-fast, 0.15s ease);
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    background: linear-gradient(135deg, #4f46e5, #4338ca);
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.5);
+  }
+}
+

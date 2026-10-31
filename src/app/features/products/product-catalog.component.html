@@ -1,496 +1,71 @@
 <div class="omni-workspace-container">
   
-  <!-- =========================================================================
-       Top Action Bar
-       ========================================================================= -->
-  <header class="workspace-action-bar">
-    <div class="action-bar-left">
-      <div class="view-title-group">
-        <h1 class="view-title">Product Catalog</h1>
-        <span class="count-chip">{{ totalRecordsCount() }} SKUs Active</span>
-      </div>
+  <!-- 1. Top Action Bar Component -->
+  <app-product-header
+    [totalCount]="totalRecordsCount()"
+    [searchQuery]="searchQuery()"
+    [isFilterDockOpen]="isFilterDockOpen()"
+    [activeFilterCount]="selectedCategories().length"
+    [selectedCount]="selectedRowIds().size"
+    (searchChange)="onSearchChange($event)"
+    (toggleFilterDock)="toggleFilterDock()"
+    (addProduct)="openCreateDrawer()"
+    (exportBulk)="onExportBulk()"
+    (archiveBulk)="onArchiveBulk()"
+  />
 
-      <!-- Quick Search Bar with Command Shortcut -->
-      <div class="search-input-wrapper">
-        <svg class="search-icon" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-        </svg>
-        <input type="text" class="search-input" placeholder="Filter by SKU, name, or hardware spec..." [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)">
-        <kbd class="shortcut-tag">⌘K</kbd>
-      </div>
-
-      <!-- Toggle Filter Rail Button -->
-      <button type="button" class="filter-toggle-btn" [class.active]="isFilterDockOpen()" (click)="toggleFilterDock()" title="Toggle Filter Rail">
-        <svg viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
-        </svg>
-        <span>Filters</span>
-        @if (selectedCategories().length > 0) {
-          <span class="filter-count-badge">{{ selectedCategories().length }}</span>
-        }
-      </button>
-    </div>
-
-    <div class="action-bar-right">
-      <!-- Bulk Actions Pill (Visible when rows selected) -->
-      @if (selectedRowIds().size > 0) {
-        <div class="bulk-action-pill">
-          <span class="bulk-count">{{ selectedRowIds().size }} selected</span>
-          <button type="button" class="bulk-btn bulk-btn-export">Export</button>
-          <button type="button" class="bulk-btn bulk-btn-danger">Archive</button>
-        </div>
-      }
-
-      <!-- Main CTA Button -->
-      <button type="button" class="btn-primary-cta" (click)="openCreateDrawer()">
-        <svg viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-        </svg>
-        <span>Add Product</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- =========================================================================
-       Main Workspace Layout (Split Dock + Central Data Grid)
-       ========================================================================= -->
+  <!-- 2. Main Workspace Layout (Dock + Central Data Grid) -->
   <div class="workspace-body-layout">
 
-    <!-- Left Collapsible Filtering Dock -->
+    <!-- Collapsible Filter Dock Component -->
     @if (isFilterDockOpen()) {
-      <aside class="filtering-dock-rail">
-        <div class="dock-header">
-          <div class="dock-title-row">
-            <svg class="dock-header-icon" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"/>
-            </svg>
-            <h2 class="dock-title">Refine Filters</h2>
-          </div>
-          <button type="button" class="dock-reset-btn" (click)="selectedCategories.set([]); priceRange.set({min: 0, max: 5000})"> Reset </button>
-        </div>
-
-        <div class="dock-sections">
-          
-          <!-- Category Multi-Select -->
-          <div class="filter-section">
-            <h3 class="section-label">Categories</h3>
-            <div class="filter-options-list">
-              @for (cat of categoryOptions(); track cat.name) {
-                <label class="dock-checkbox-row">
-                  <input type="checkbox" [checked]="selectedCategories().includes(cat.name)" (change)="toggleCategory(cat.name)">
-                  <span class="dock-check-box"></span>
-                  <span class="cat-label">{{ cat.name }}</span>
-                  <span class="cat-count">{{ 1 }}</span>
-                </label>
-              }
-            </div>
-          </div>
-
-          <!-- Dual-Handle Price Slider -->
-          <div class="filter-section">
-            <div class="price-header-row">
-              <h3 class="section-label">Price Range (USD)</h3>
-              <div class="price-indicators">
-                <span class="price-chip">${{ priceRange().min }}</span>
-                <span class="price-separator">-</span>
-                <span class="price-chip">${{ priceRange().max }}</span>
-              </div>
-            </div>
-
-            <div class="dual-slider-container">
-              <div class="slider-track-highlight" [style.left.%]="(priceRange().min / 5000) * 100" [style.right.%]="100 - (priceRange().max / 5000) * 100">
-              </div>
-              <input type="range" min="0" max="5000" step="50" [value]="priceRange().min" (input)="updatePriceRange('min', $event)" class="range-thumb range-thumb-min">
-              <input type="range" min="0" max="5000" step="50" [value]="priceRange().max" (input)="updatePriceRange('max', $event)" class="range-thumb range-thumb-max">
-            </div>
-          </div>
-
-          <!-- Stock Availability -->
-          <div class="filter-section">
-            <h3 class="section-label">Inventory Threshold</h3>
-            <div class="status-toggles">
-              <label class="status-radio-label">
-                <input type="radio" name="inventoryState" checked>
-                <span class="status-dot dot-all"></span>
-                <span>All Catalog</span>
-              </label>
-              <label class="status-radio-label">
-                <input type="radio" name="inventoryState">
-                <span class="status-dot dot-instock"></span>
-                <span>Ready to Ship (&gt; 0)</span>
-              </label>
-              <label class="status-radio-label">
-                <input type="radio" name="inventoryState">
-                <span class="status-dot dot-low"></span>
-                <span>Critically Low (&le; 10)</span>
-              </label>
-            </div>
-          </div>
-
-        </div>
-      </aside>
+      <app-product-filter-dock
+        [categories]="categoryOptions()"
+        [selectedCategories]="selectedCategories()"
+        [priceRange]="priceRange()"
+        [selectedStockFilter]="stockFilter()"
+        (categoryToggled)="toggleCategory($event)"
+        (priceRangeChanged)="updatePriceRange($event)"
+        (stockFilterChanged)="updateStockFilter($event)"
+        (reset)="resetFilters()"
+      />
     }
 
-    <!-- Central Data Grid Container -->
+    <!-- Central Data Grid & Pagination Content -->
     <main class="grid-main-content">
-      <div class="table-scroll-surface">
-        <table class="omni-enterprise-table">
-          <thead>
-            <tr>
-              <!-- Row Select All -->
-              <th class="col-checkbox">
-                <label class="table-checkbox">
-                  <input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll()">
-                  <span class="check-indicator"></span>
-                </label>
-              </th>
+      <app-product-table
+        [products]="filteredProducts()"
+        [selectedRowIds]="selectedRowIds()"
+        [sortField]="sortField()"
+        [sortDirection]="sortDirection()"
+        [isAllSelected]="isAllSelected()"
+        (sort)="handleSort($event)"
+        (toggleSelectAll)="toggleSelectAll()"
+        (toggleSelectRow)="toggleSelectRow($event)"
+        (edit)="openEditDrawer($event)"
+        (delete)="deleteProduct($event.product, $event.event)"
+      />
 
-              <!-- Product Image Thumbnail -->
-              <th class="col-thumb">Preview</th>
-
-              <!-- Product Name (Sortable) -->
-              <th class="col-name sortable-th" (click)="handleSort('name')">
-                <div class="th-content">
-                  <span>Product Title</span>
-                  <span class="sort-glyph" [class.active]="sortField() === 'name'">
-                    @if (sortField() === 'name' && sortDirection() === 'asc') {
-                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5l4 4.5H4l4-4.5z"/></svg>
-                    } @else if (sortField() === 'name' && sortDirection() === 'desc') {
-                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 12.5l-4-4.5h8l-4 4.5z"/></svg>
-                    } @else {
-                      <svg viewBox="0 0 16 16" fill="currentColor" opacity="0.4"><path d="M8 3.5l3.5 4H4.5L8 3.5zm0 9l-3.5-4h7l-3.5 4z"/></svg>
-                    }
-                  </span>
-                </div>
-              </th>
-
-              <!-- SKU (Sortable) -->
-              <th class="col-sku sortable-th" (click)="handleSort('sku')">
-                <div class="th-content">
-                  <span>SKU</span>
-                  <span class="sort-glyph" [class.active]="sortField() === 'sku'">
-                    @if (sortField() === 'sku' && sortDirection() === 'asc') {
-                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5l4 4.5H4l4-4.5z"/></svg>
-                    } @else if (sortField() === 'sku' && sortDirection() === 'desc') {
-                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 12.5l-4-4.5h8l-4 4.5z"/></svg>
-                    } @else {
-                      <svg viewBox="0 0 16 16" fill="currentColor" opacity="0.4"><path d="M8 3.5l3.5 4H4.5L8 3.5zm0 9l-3.5-4h7l-3.5 4z"/></svg>
-                    }
-                  </span>
-                </div>
-              </th>
-
-              <!-- Category -->
-              <th class="col-category">Category</th>
-
-              <!-- Unit Price (Sortable) -->
-              <th class="col-price sortable-th text-right" (click)="handleSort('price')">
-                <div class="th-content justify-end">
-                  <span>Unit Price</span>
-                  <span class="sort-glyph" [class.active]="sortField() === 'price'">
-                    @if (sortField() === 'price' && sortDirection() === 'asc') {
-                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5l4 4.5H4l4-4.5z"/></svg>
-                    } @else if (sortField() === 'price' && sortDirection() === 'desc') {
-                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 12.5l-4-4.5h8l-4 4.5z"/></svg>
-                    } @else {
-                      <svg viewBox="0 0 16 16" fill="currentColor" opacity="0.4"><path d="M8 3.5l3.5 4H4.5L8 3.5zm0 9l-3.5-4h7l-3.5 4z"/></svg>
-                    }
-                  </span>
-                </div>
-              </th>
-
-              <!-- Stock Level (Sortable) -->
-              <th class="col-stock sortable-th" (click)="handleSort('stock')">
-                <div class="th-content">
-                  <span>Stock Status</span>
-                  <span class="sort-glyph" [class.active]="sortField() === 'stock'">
-                    @if (sortField() === 'stock' && sortDirection() === 'asc') {
-                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5l4 4.5H4l4-4.5z"/></svg>
-                    } @else if (sortField() === 'stock' && sortDirection() === 'desc') {
-                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 12.5l-4-4.5h8l-4 4.5z"/></svg>
-                    } @else {
-                      <svg viewBox="0 0 16 16" fill="currentColor" opacity="0.4"><path d="M8 3.5l3.5 4H4.5L8 3.5zm0 9l-3.5-4h7l-3.5 4z"/></svg>
-                    }
-                  </span>
-                </div>
-              </th>
-
-              <!-- Row Action Tools -->
-              <th class="col-actions text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (product of filteredProducts(); track product.id) {
-              <tr 
-                class="data-row" 
-                [class.selected]="selectedRowIds().has(product.id)"
-                (click)="toggleSelectRow(product.id)">
-                
-                <!-- Checkbox -->
-                <td class="col-checkbox" (click)="$event.stopPropagation()">
-                  <label class="table-checkbox">
-                    <input type="checkbox" [checked]="selectedRowIds().has(product.id)" (change)="toggleSelectRow(product.id)">
-                    <span class="check-indicator"></span>
-                  </label>
-                </td>
-
-                <!-- Thumbnail -->
-                <td class="col-thumb">
-                  <div class="table-img-wrapper">
-                    <img [src]="product.imageUrl" [alt]="product.name" class="product-thumb-img" loading="lazy">
-                  </div>
-                </td>
-
-                <!-- Product Name -->
-                <td class="col-name">
-                  <div class="product-title-cell">
-                    <span class="title-text" (click)="openEditDrawer(product); $event.stopPropagation()">{{ product.name }}</span>
-                    <span class="sync-date">Updated: {{ product.updatedAt }}</span>
-                  </div>
-                </td>
-
-                <!-- SKU -->
-                <td class="col-sku">
-                  <span class="sku-badge">{{ product.sku }}</span>
-                </td>
-
-                <!-- Category -->
-                <td class="col-category">
-                  <span class="category-pill">{{ product.categoryId }}</span>
-                </td>
-
-                <!-- Price -->
-                <td class="col-price text-right">
-                  <span class="price-val">${{ product.price | number:'1.2-2' }}</span>
-                </td>
-
-                <!-- Stock Level Indicator -->
-                <td class="col-stock">
-                  <div class="stock-meter-block">
-                    <div class="stock-header">
-                      <span class="stock-badge" [class]="product.stockStatus">
-                        @if (product.stockStatus === 'in_stock') {
-                          ● In Stock
-                        } @else if (product.stockStatus === 'low_stock') {
-                          ▲ Low Stock
-                        } @else {
-                          ✕ Depleted
-                        }
-                      </span>
-                      <span class="stock-units">{{ product.stock }} units</span>
-                    </div>
-                    <div class="stock-bar-track">
-                      <div class="stock-bar-fill" [class]="product.stockStatus" [style.width.%]="product.stock > 100 ? 100 : product.stock">
-                      </div>
-                    </div>
-                  </div>
-                </td>
-
-                <!-- Action Buttons -->
-                <td class="col-actions text-right" (click)="$event.stopPropagation()">
-                  <div class="row-actions-group">
-                    <button type="button" class="row-action-btn edit-btn" (click)="openEditDrawer(product)" title="Edit Product Spec">
-                      <svg viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                      </svg>
-                    </button>
-                    <button type="button" class="row-action-btn delete-btn" (click)="deleteProduct(product, $event)" title="Archive SKU">
-                      <svg viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="8" class="empty-state-cell">
-                  <div class="empty-state-content">
-                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                    </svg>
-                    <span class="empty-title">No products match your filter parameters</span>
-                    <span class="empty-hint">Try adjusting your category selection or pricing threshold slider.</span>
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-
-      <!-- =========================================================================
-           Sticky Footer Pagination Bar
-           ========================================================================= -->
-      <footer class="sticky-pagination-bar">
-        <div class="pagination-left">
-          <span class="pagination-info">
-            Showing <strong class="highlight">1</strong> to <strong class="highlight">{{ filteredProducts().length }}</strong> of <strong class="highlight">{{ totalRecordsCount() }}</strong> catalog records
-          </span>
-          <div class="page-size-selector">
-            <span class="size-label">Rows per page:</span>
-            <select class="size-dropdown" [value]="pageSize()" (change)="pageSize.set(+$any($event.target).value)">
-              <option [value]="10">10</option>
-              <option [value]="20">20</option>
-              <option [value]="50">50</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="pagination-nav">
-          <button type="button" class="page-nav-btn" disabled aria-label="Previous page">
-            <svg viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-            </svg>
-          </button>
-          <button type="button" class="page-number-btn active">1</button>
-          <button type="button" class="page-number-btn">2</button>
-          <button type="button" class="page-number-btn">3</button>
-          <span class="page-ellipsis">...</span>
-          <button type="button" class="page-number-btn">14</button>
-          <button type="button" class="page-nav-btn" aria-label="Next page">
-            <svg viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-            </svg>
-          </button>
-        </div>
-      </footer>
+      <!-- Sticky Pagination Bar Component -->
+      <app-product-pagination
+        [currentPage]="currentPage()"
+        [pageSize]="pageSize()"
+        [totalCount]="totalRecordsCount()"
+        [displayedCount]="filteredProducts().length"
+        (pageChange)="changePage($event)"
+        (pageSizeChange)="changePageSize($event)"
+      />
     </main>
   </div>
 
-  <!-- =========================================================================
-       Slide-Out Action Drawer (Add / Edit Product)
-       ========================================================================= -->
-  @if (isDrawerOpen()) {
-    <div class="drawer-overlay" (click)="closeDrawer()">
-      <aside class="action-drawer" (click)="$event.stopPropagation()">
-        
-        <!-- Drawer Header -->
-        <header class="drawer-header">
-          <div class="drawer-title-group">
-            <span class="drawer-badge">{{ drawerMode() === 'create' ? 'Provisioning' : 'Modifier' }}</span>
-            <h2 class="drawer-title">{{ drawerMode() === 'create' ? 'Add New Product' : 'Edit Product Specification' }}</h2>
-          </div>
-          <button type="button" class="drawer-close-btn" (click)="closeDrawer()" aria-label="Close drawer">
-            <svg viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-            </svg>
-          </button>
-        </header>
-
-        <!-- Drawer Scrollable Form -->
-        <div class="drawer-body">
-          <form [formGroup]="productForm" class="drawer-form" novalidate>
-            
-            <!-- Product Title -->
-            <div class="drawer-field">
-              <label class="drawer-label" for="prod-name">Product Name *</label>
-              <input id="prod-name" type="text" formControlName="name" class="drawer-input" placeholder="e.g. OmniEdge 5G Enterprise Gateway">
-              <app-input-error [control]="productForm.controls.name" fieldLabel="Product Name"></app-input-error>
-            </div>
-
-            <!-- SKU & Category Row -->
-            <div class="drawer-two-col">
-              <div class="drawer-field">
-                <label class="drawer-label" for="prod-sku">SKU Code *</label>
-                <input id="prod-sku" type="text" formControlName="sku" class="drawer-input font-mono" placeholder="OGW-8820-PRO">
-                <app-input-error [control]="productForm.controls.sku" fieldLabel="SKU Code"></app-input-error>
-              </div>
-
-              <div class="drawer-field">
-                <label class="drawer-label" for="prod-cat">Category *</label>
-                <select id="prod-cat" formControlName="categoryId" class="drawer-select">
-                  @for (c of categoryOptions(); track c.name) {
-                    <option [value]="c.id">{{ c.name }}</option>
-                  }
-                </select>
-              </div>
-            </div>
-
-            <!-- Price & Stock Row -->
-            <div class="drawer-two-col">
-              <div class="drawer-field">
-                <label class="drawer-label" for="prod-price">Retail Price ($ USD) *</label>
-                <div class="price-input-adornment">
-                  <span class="currency-symbol">$</span>
-                  <input id="prod-price" type="number" step="0.01" formControlName="price" class="drawer-input">
-                </div>
-                <app-input-error [control]="productForm.controls.price" fieldLabel="Price"></app-input-error>
-              </div>
-
-              <div class="drawer-field">
-                <label class="drawer-label" for="prod-stock">Initial Stock Quantity *</label>
-                <input id="prod-stock" type="number" formControlName="stock" class="drawer-input">
-                <app-input-error [control]="productForm.controls.stock" fieldLabel="Stock"></app-input-error>
-              </div>
-            </div>
-
-            <!-- Drag & Drop Media Uploader -->
-            <div class="drawer-field">
-              <label class="drawer-label">Product Visual Asset</label>
-              
-              <div class="file-drop-zone" [class.drag-over]="isDraggingOver()" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
-                <input type="file" id="asset-upload" class="hidden-file-input" accept="image/*">
-                <div class="drop-zone-content">
-                  <div class="upload-icon-circle">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                  </div>
-                  <div class="drop-text-group">
-                    <label for="asset-upload" class="browse-link">Click to upload</label>
-                    <span class="drop-subtext">or drag & drop high-resolution asset</span>
-                  </div>
-                  <span class="file-types-hint">WEBP, PNG, JPG up to 12MB (4K optimized)</span>
-                </div>
-              </div>
-
-              <!-- Upload Progress Indicator Bar -->
-              @if (uploadedFile()) {
-                <div class="file-upload-preview-card">
-                  <div class="file-icon-thumb">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M4 4a2 2 0 012-2h8l6 6v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
-                    </svg>
-                  </div>
-                  <div class="file-meta-col">
-                    <div class="file-name-row">
-                      <span class="file-name-text">{{ uploadedFile()!.name }}</span>
-                      <span class="file-progress-pct">{{ uploadedFile()!.progress }}%</span>
-                    </div>
-                    <div class="progress-bar-track">
-                      <div class="progress-bar-fill" [style.width.%]="uploadedFile()!.progress"></div>
-                    </div>
-                    <span class="file-size-tag">{{ uploadedFile()!.size }}</span>
-                  </div>
-                  <button type="button" class="remove-file-btn" (click)="clearUploadedFile()" title="Remove file">
-                    <svg viewBox="0 0 16 16" fill="currentColor">
-                      <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                    </svg>
-                  </button>
-                </div>
-              }
-            </div>
-
-            <!-- Description -->
-            <div class="drawer-field">
-              <label class="drawer-label" for="prod-desc">Specification Summary</label>
-              <textarea id="prod-desc" formControlName="description" rows="3" class="drawer-textarea" placeholder="Enterprise specifications, firmware version, and packaging tags..."></textarea>
-            </div>
-
-          </form>
-        </div>
-
-        <!-- Sticky Drawer Footer -->
-        <footer class="drawer-footer">
-          <button type="button" class="btn-drawer-cancel" (click)="closeDrawer()">Cancel</button>
-          <button type="button" class="btn-drawer-save" (click)="saveProduct()">
-            <span>Save SKU Specification</span>
-          </button>
-        </footer>
-
-      </aside>
-    </div>
-  }
+  <!-- 3. Slide-Out Action Drawer Component (Add / Edit Product) -->
+  <app-product-drawer
+    [isOpen]="isDrawerOpen()"
+    [mode]="drawerMode()"
+    [categories]="categoryOptions()"
+    [product]="selectedProductForEdit()"
+    (close)="closeDrawer()"
+    (save)="onSaveProduct($event)"
+  />
 
 </div>

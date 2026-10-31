@@ -1,102 +1,58 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { InputErrorComponent } from '../../shared/components/input-error/input-error.component';
-import { AuthService } from '../../core/services/auth';
 import { Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth';
+import { AuthMarketingComponent } from './components/auth-marketing/auth-marketing.component';
+import { LoginFormComponent } from './components/login-form/login-form.component';
+import { RegisterFormComponent } from './components/register-form/register-form.component';
 
 @Component({
   selector: 'app-auth-portal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, InputErrorComponent],
+  imports: [CommonModule, AuthMarketingComponent, LoginFormComponent, RegisterFormComponent],
   templateUrl: './auth-portal.component.html',
   styleUrl: './auth-portal.component.scss'
 })
-export class AuthPortalComponent {
-  // Signals for view switching & UI states
-  readonly authService = inject(AuthService);
-  readonly router = inject(Router);
+export class AuthPortalComponent implements OnInit {
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
   readonly isRegisterMode = signal<boolean>(false);
-  readonly showPassword = signal<boolean>(false);
-  readonly showConfirmPassword = signal<boolean>(false);
   readonly isSubmitting = signal<boolean>(false);
 
-  // Reactive Forms
-  readonly loginForm = new FormGroup({
-    email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required, Validators.minLength(8)]),
-    rememberMe: new FormControl(false)
-  });
+  ngOnInit(): void {
+    if (this.router.url.includes('register')) {
+      this.isRegisterMode.set(true);
+    }
+  }
 
-  readonly registerForm = new FormGroup({
-    fullName: new FormControl('', [Validators.required, Validators.minLength(3)]),
-    email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required, Validators.minLength(8)]),
-    // confirmPassword: new FormControl('', [Validators.required]),
-    agreeTerms: new FormControl(false, [Validators.requiredTrue])
-  });
-
-  // Password strength calculation computed signal
-  readonly passwordStrength = computed(() => {
-    const pwd = this.registerForm.controls.password.value || '';
-    if (!pwd) return { score: 0, label: 'None', colorClass: 'none' };
-    let score = 0;
-    if (pwd.length >= 8) score++;
-    if (/[A-Z]/.test(pwd)) score++;
-    if (/[0-9]/.test(pwd)) score++;
-    if (/[^A-Za-z0-9]/.test(pwd)) score++;
-
-    if (score <= 1) return { score: 1, label: 'Weak', colorClass: 'weak' };
-    if (score === 2) return { score: 2, label: 'Fair', colorClass: 'fair' };
-    if (score === 3) return { score: 3, label: 'Good', colorClass: 'good' };
-    return { score: 4, label: 'Enterprise Strong', colorClass: 'strong' };
-  });
-
-  toggleMode(register: boolean) {
+  toggleMode(register: boolean): void {
     this.isRegisterMode.set(register);
   }
 
-  togglePasswordVisibility(field: 'password' | 'confirm') {
-    if (field === 'password') {
-      this.showPassword.update(v => !v);
-    } else {
-      this.showConfirmPassword.update(v => !v);
-    }
-  }
-
-  handleLoginSubmit() {
-    if (this.loginForm.invalid) {
-      this.loginForm.markAllAsTouched();
-      return;
-    }
+  handleLogin(credentials: { email: string; password: string; rememberMe: boolean }): void {
     this.isSubmitting.set(true);
-    this.authService.login(this.loginForm.value).subscribe({
-      next: (res) => {
+    this.authService.login(credentials).subscribe({
+      next: () => {
         this.isSubmitting.set(false);
-        this.router.navigate(['/dashboard/products'])
-        console.log(res)
-        debugger
+        this.router.navigate(['/dashboard/products']);
       },
-      error: (err: any) => {
+      error: () => {
         this.isSubmitting.set(false);
       }
-    })
+    });
   }
 
-  handleRegisterSubmit() {
-    if (this.registerForm.invalid) {
-      this.registerForm.markAllAsTouched();
-      return;
-    }
+  handleRegister(payload: { fullName: string; email: string; password: string; agreeTerms: boolean }): void {
     this.isSubmitting.set(true);
-    this.authService.register(this.registerForm.value).subscribe({
-      next: (res) => {
-        console.log(res)
-        debugger
+    this.authService.register(payload).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.router.navigate(['/dashboard/products']);
       },
-      error: (err: any) => {
+      error: () => {
         this.isSubmitting.set(false);
       }
-    })
+    });
   }
 }

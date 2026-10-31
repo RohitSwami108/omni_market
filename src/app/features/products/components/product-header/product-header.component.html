@@ -1,0 +1,58 @@
+<header class="workspace-action-bar">
+  <div class="action-bar-left">
+    <div class="view-title-group">
+      <h1 class="view-title">Product Catalog</h1>
+      <span class="count-chip">{{ totalCount() }} SKUs Active</span>
+    </div>
+
+    <!-- Quick Search Bar with Command Shortcut -->
+    <div class="search-input-wrapper">
+      <svg class="search-icon" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+      </svg>
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Filter by SKU, name, or hardware spec..." 
+        [value]="searchQuery()" 
+        (input)="onSearchInput($event)">
+      <kbd class="shortcut-tag">⌘K</kbd>
+    </div>
+
+    <!-- Toggle Filter Rail Button -->
+    <button 
+      type="button" 
+      class="filter-toggle-btn" 
+      [class.active]="isFilterDockOpen()" 
+      (click)="toggleFilterDock.emit()" 
+      title="Toggle Filter Rail">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
+      </svg>
+      <span>Filters</span>
+      @if (activeFilterCount() > 0) {
+        <span class="filter-count-badge">{{ activeFilterCount() }}</span>
+      }
+    </button>
+  </div>
+
+  <div class="action-bar-right">
+    <!-- Bulk Actions Pill (Visible when rows selected) -->
+    @if (selectedCount() > 0) {
+      <div class="bulk-action-pill">
+        <span class="bulk-count">{{ selectedCount() }} selected</span>
+        <button type="button" class="bulk-btn bulk-btn-export" (click)="exportBulk.emit()">Export</button>
+        <button type="button" class="bulk-btn bulk-btn-danger" (click)="archiveBulk.emit()">Archive</button>
+      </div>
+    }
+
+    <!-- Main CTA Button -->
+    <button type="button" class="btn-primary-cta" (click)="addProduct.emit()">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+      </svg>
+      <span>Add Product</span>
+    </button>
+  </div>
+</header>
+

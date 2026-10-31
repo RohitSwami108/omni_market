@@ -1,0 +1,104 @@
+<aside class="filtering-dock-rail">
+  <div class="dock-header">
+    <div class="dock-title-row">
+      <svg class="dock-header-icon" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"/>
+      </svg>
+      <h2 class="dock-title">Refine Filters</h2>
+    </div>
+    <button type="button" class="dock-reset-btn" (click)="reset.emit()"> Reset </button>
+  </div>
+
+  <div class="dock-sections">
+    
+    <!-- Category Multi-Select -->
+    <div class="filter-section">
+      <h3 class="section-label">Categories</h3>
+      <div class="filter-options-list">
+        @for (cat of categories(); track cat.id || cat.name) {
+          <label class="dock-checkbox-row">
+            <input 
+              type="checkbox" 
+              [checked]="selectedCategories().includes(cat.name)" 
+              (change)="categoryToggled.emit(cat.name)">
+            <span class="dock-check-box"></span>
+            <span class="cat-label">{{ cat.name }}</span>
+            <span class="cat-count">1</span>
+          </label>
+        }
+      </div>
+    </div>
+
+    <!-- Dual-Handle Price Slider -->
+    <div class="filter-section">
+      <div class="price-header-row">
+        <h3 class="section-label">Price Range (USD)</h3>
+        <div class="price-indicators">
+          <span class="price-chip">${{ priceRange().min }}</span>
+          <span class="price-separator">-</span>
+          <span class="price-chip">${{ priceRange().max }}</span>
+        </div>
+      </div>
+
+      <div class="dual-slider-container">
+        <div 
+          class="slider-track-highlight" 
+          [style.left.%]="(priceRange().min / 5000) * 100" 
+          [style.right.%]="100 - (priceRange().max / 5000) * 100">
+        </div>
+        <input 
+          type="range" 
+          min="0" 
+          max="5000" 
+          step="50" 
+          [value]="priceRange().min" 
+          (input)="onMinPriceChange($event)" 
+          class="range-thumb range-thumb-min">
+        <input 
+          type="range" 
+          min="0" 
+          max="5000" 
+          step="50" 
+          [value]="priceRange().max" 
+          (input)="onMaxPriceChange($event)" 
+          class="range-thumb range-thumb-max">
+      </div>
+    </div>
+
+    <!-- Stock Availability -->
+    <div class="filter-section">
+      <h3 class="section-label">Inventory Threshold</h3>
+      <div class="status-toggles">
+        <label class="status-radio-label">
+          <input 
+            type="radio" 
+            name="inventoryState" 
+            [checked]="selectedStockFilter() === 'all'" 
+            (change)="stockFilterChanged.emit('all')">
+          <span class="status-dot dot-all"></span>
+          <span>All Catalog</span>
+        </label>
+        <label class="status-radio-label">
+          <input 
+            type="radio" 
+            name="inventoryState" 
+            [checked]="selectedStockFilter() === 'in_stock'" 
+            (change)="stockFilterChanged.emit('in_stock')">
+          <span class="status-dot dot-instock"></span>
+          <span>Ready to Ship (&gt; 0)</span>
+        </label>
+        <label class="status-radio-label">
+          <input 
+            type="radio" 
+            name="inventoryState" 
+            [checked]="selectedStockFilter() === 'low_stock'" 
+            (change)="stockFilterChanged.emit('low_stock')">
+          <span class="status-dot dot-low"></span>
+          <span>Critically Low (&le; 10)</span>
+        </label>
+      </div>
+    </div>
+
+  </div>
+</aside>
+

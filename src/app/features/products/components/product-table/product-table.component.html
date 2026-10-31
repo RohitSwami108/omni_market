@@ -1,0 +1,197 @@
+<div class="table-scroll-surface">
+  <table class="omni-enterprise-table">
+    <thead>
+      <tr>
+        <!-- Row Select All -->
+        <th class="col-checkbox">
+          <label class="table-checkbox">
+            <input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll.emit()">
+            <span class="check-indicator"></span>
+          </label>
+        </th>
+
+        <!-- Product Image Thumbnail -->
+        <th class="col-thumb">Preview</th>
+
+        <!-- Product Name (Sortable) -->
+        <th class="col-name sortable-th" (click)="handleSort('name')">
+          <div class="th-content">
+            <span>Product Title</span>
+            <span class="sort-glyph" [class.active]="sortField() === 'name'">
+              @if (sortField() === 'name' && sortDirection() === 'asc') {
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5l4 4.5H4l4-4.5z"/></svg>
+              } @else if (sortField() === 'name' && sortDirection() === 'desc') {
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 12.5l-4-4.5h8l-4 4.5z"/></svg>
+              } @else {
+                <svg viewBox="0 0 16 16" fill="currentColor" opacity="0.4"><path d="M8 3.5l3.5 4H4.5L8 3.5zm0 9l-3.5-4h7l-3.5 4z"/></svg>
+              }
+            </span>
+          </div>
+        </th>
+
+        <!-- SKU (Sortable) -->
+        <th class="col-sku sortable-th" (click)="handleSort('sku')">
+          <div class="th-content">
+            <span>SKU</span>
+            <span class="sort-glyph" [class.active]="sortField() === 'sku'">
+              @if (sortField() === 'sku' && sortDirection() === 'asc') {
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5l4 4.5H4l4-4.5z"/></svg>
+              } @else if (sortField() === 'sku' && sortDirection() === 'desc') {
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 12.5l-4-4.5h8l-4 4.5z"/></svg>
+              } @else {
+                <svg viewBox="0 0 16 16" fill="currentColor" opacity="0.4"><path d="M8 3.5l3.5 4H4.5L8 3.5zm0 9l-3.5-4h7l-3.5 4z"/></svg>
+              }
+            </span>
+          </div>
+        </th>
+
+        <!-- Category -->
+        <th class="col-category">Category</th>
+
+        <!-- Unit Price (Sortable) -->
+        <th class="col-price sortable-th text-right" (click)="handleSort('price')">
+          <div class="th-content justify-end">
+            <span>Unit Price</span>
+            <span class="sort-glyph" [class.active]="sortField() === 'price'">
+              @if (sortField() === 'price' && sortDirection() === 'asc') {
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5l4 4.5H4l4-4.5z"/></svg>
+              } @else if (sortField() === 'price' && sortDirection() === 'desc') {
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 12.5l-4-4.5h8l-4 4.5z"/></svg>
+              } @else {
+                <svg viewBox="0 0 16 16" fill="currentColor" opacity="0.4"><path d="M8 3.5l3.5 4H4.5L8 3.5zm0 9l-3.5-4h7l-3.5 4z"/></svg>
+              }
+            </span>
+          </div>
+        </th>
+
+        <!-- Stock Level (Sortable) -->
+        <th class="col-stock sortable-th" (click)="handleSort('stock')">
+          <div class="th-content">
+            <span>Stock Status</span>
+            <span class="sort-glyph" [class.active]="sortField() === 'stock'">
+              @if (sortField() === 'stock' && sortDirection() === 'asc') {
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5l4 4.5H4l4-4.5z"/></svg>
+              } @else if (sortField() === 'stock' && sortDirection() === 'desc') {
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 12.5l-4-4.5h8l-4 4.5z"/></svg>
+              } @else {
+                <svg viewBox="0 0 16 16" fill="currentColor" opacity="0.4"><path d="M8 3.5l3.5 4H4.5L8 3.5zm0 9l-3.5-4h7l-3.5 4z"/></svg>
+              }
+            </span>
+          </div>
+        </th>
+
+        <!-- Row Action Tools -->
+        <th class="col-actions text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (product of products(); track product.id) {
+        <tr 
+          class="data-row" 
+          [class.selected]="selectedRowIds().has(product.id)"
+          (click)="onRowClick(product)">
+          
+          <!-- Checkbox -->
+          <td class="col-checkbox" (click)="$event.stopPropagation()">
+            <label class="table-checkbox">
+              <input 
+                type="checkbox" 
+                [checked]="selectedRowIds().has(product.id)" 
+                (change)="onCheckboxClick($event, product.id)">
+              <span class="check-indicator"></span>
+            </label>
+          </td>
+
+          <!-- Thumbnail -->
+          <td class="col-thumb">
+            <div class="table-img-wrapper">
+              <img [src]="product.imageUrl" [alt]="product.name" class="product-thumb-img" loading="lazy">
+            </div>
+          </td>
+
+          <!-- Product Name -->
+          <td class="col-name">
+            <div class="product-title-cell">
+              <span class="title-text" (click)="onTitleClick($event, product)">{{ product.name }}</span>
+              <span class="sync-date">Updated: {{ product.updatedAt }}</span>
+            </div>
+          </td>
+
+          <!-- SKU -->
+          <td class="col-sku">
+            <span class="sku-badge">{{ product.sku }}</span>
+          </td>
+
+          <!-- Category -->
+          <td class="col-category">
+            <span class="category-pill">{{ product.categoryId }}</span>
+          </td>
+
+          <!-- Price -->
+          <td class="col-price text-right">
+            <span class="price-val">${{ product.price | number:'1.2-2' }}</span>
+          </td>
+
+          <!-- Stock Level Indicator -->
+          <td class="col-stock">
+            <div class="stock-meter-block">
+              <div class="stock-header">
+                <span class="stock-badge" [class]="product.stockStatus">
+                  @if (product.stockStatus === 'in_stock') {
+                    ● In Stock
+                  } @else if (product.stockStatus === 'low_stock') {
+                    ▲ Low Stock
+                  } @else {
+                    ✕ Depleted
+                  }
+                </span>
+                <span class="stock-units">{{ product.stock }} units</span>
+              </div>
+              <div class="stock-bar-track">
+                <div class="stock-bar-fill" [class]="product.stockStatus" [style.width.%]="product.stock > 100 ? 100 : product.stock">
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- Action Buttons -->
+          <td class="col-actions text-right" (click)="$event.stopPropagation()">
+            <div class="row-actions-group">
+              <button 
+                type="button" 
+                class="row-action-btn edit-btn" 
+                (click)="onEditClick($event, product)" 
+                title="Edit Product Spec">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                </svg>
+              </button>
+              <button 
+                type="button" 
+                class="row-action-btn delete-btn" 
+                (click)="onDeleteClick($event, product)" 
+                title="Archive SKU">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="8" class="empty-state-cell">
+            <div class="empty-state-content">
+              <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+              </svg>
+              <span class="empty-title">No products match your filter parameters</span>
+              <span class="empty-hint">Try adjusting your category selection or pricing threshold slider.</span>
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+

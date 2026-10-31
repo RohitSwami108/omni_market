@@ -1,0 +1,142 @@
+@if (isOpen()) {
+  <div class="drawer-overlay" (click)="close.emit()">
+    <aside class="action-drawer" (click)="$event.stopPropagation()">
+      
+      <!-- Drawer Header -->
+      <header class="drawer-header">
+        <div class="drawer-title-group">
+          <span class="drawer-badge">{{ mode() === 'create' ? 'Provisioning' : 'Modifier' }}</span>
+          <h2 class="drawer-title">{{ mode() === 'create' ? 'Add New Product' : 'Edit Product Specification' }}</h2>
+        </div>
+        <button type="button" class="drawer-close-btn" (click)="close.emit()" aria-label="Close drawer">
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </header>
+
+      <!-- Drawer Scrollable Form -->
+      <div class="drawer-body">
+        <form [formGroup]="productForm" class="drawer-form" novalidate>
+          
+          <!-- Product Title -->
+          <div class="drawer-field">
+            <label class="drawer-label" for="prod-name">Product Name *</label>
+            <input id="prod-name" type="text" formControlName="name" class="drawer-input" placeholder="e.g. OmniEdge 5G Enterprise Gateway">
+            <app-input-error [control]="productForm.controls.name" fieldLabel="Product Name"></app-input-error>
+          </div>
+
+          <!-- SKU & Category Row -->
+          <div class="drawer-two-col">
+            <div class="drawer-field">
+              <label class="drawer-label" for="prod-sku">SKU Code *</label>
+              <input id="prod-sku" type="text" formControlName="sku" class="drawer-input font-mono" placeholder="OGW-8820-PRO">
+              <app-input-error [control]="productForm.controls.sku" fieldLabel="SKU Code"></app-input-error>
+            </div>
+
+            <div class="drawer-field">
+              <label class="drawer-label" for="prod-cat">Category *</label>
+              <select id="prod-cat" formControlName="categoryId" class="drawer-select">
+                @for (c of categories(); track c.name) {
+                  <option [value]="c.id">{{ c.name }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <!-- Price & Stock Row -->
+          <div class="drawer-two-col">
+            <div class="drawer-field">
+              <label class="drawer-label" for="prod-price">Retail Price ($ USD) *</label>
+              <div class="price-input-adornment">
+                <span class="currency-symbol">$</span>
+                <input id="prod-price" type="number" step="0.01" formControlName="price" class="drawer-input">
+              </div>
+              <app-input-error [control]="productForm.controls.price" fieldLabel="Price"></app-input-error>
+            </div>
+
+            <div class="drawer-field">
+              <label class="drawer-label" for="prod-stock">Initial Stock Quantity *</label>
+              <input id="prod-stock" type="number" formControlName="stock" class="drawer-input">
+              <app-input-error [control]="productForm.controls.stock" fieldLabel="Stock"></app-input-error>
+            </div>
+          </div>
+
+          <!-- Drag & Drop Media Uploader -->
+          <div class="drawer-field">
+            <label class="drawer-label">Product Visual Asset</label>
+            
+            <div 
+              class="file-drop-zone" 
+              [class.drag-over]="isDraggingOver()" 
+              (dragover)="onDragOver($event)" 
+              (dragleave)="onDragLeave($event)" 
+              (drop)="onDrop($event)">
+              <input 
+                type="file" 
+                id="asset-upload" 
+                class="hidden-file-input" 
+                accept="image/*"
+                (change)="onFileSelected($event)">
+              <div class="drop-zone-content">
+                <div class="upload-icon-circle">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                </div>
+                <div class="drop-text-group">
+                  <label for="asset-upload" class="browse-link">Click to upload</label>
+                  <span class="drop-subtext">or drag & drop high-resolution asset</span>
+                </div>
+                <span class="file-types-hint">WEBP, PNG, JPG up to 12MB (4K optimized)</span>
+              </div>
+            </div>
+
+            <!-- Upload Progress Indicator Bar -->
+            @if (uploadedFile()) {
+              <div class="file-upload-preview-card">
+                <div class="file-icon-thumb">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M4 4a2 2 0 012-2h8l6 6v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+                  </svg>
+                </div>
+                <div class="file-meta-col">
+                  <div class="file-name-row">
+                    <span class="file-name-text">{{ uploadedFile()!.name }}</span>
+                    <span class="file-progress-pct">{{ uploadedFile()!.progress }}%</span>
+                  </div>
+                  <div class="progress-bar-track">
+                    <div class="progress-bar-fill" [style.width.%]="uploadedFile()!.progress"></div>
+                  </div>
+                  <span class="file-size-tag">{{ uploadedFile()!.size }}</span>
+                </div>
+                <button type="button" class="remove-file-btn" (click)="clearUploadedFile()" title="Remove file">
+                  <svg viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                  </svg>
+                </button>
+              </div>
+            }
+          </div>
+
+          <!-- Description -->
+          <div class="drawer-field">
+            <label class="drawer-label" for="prod-desc">Specification Summary</label>
+            <textarea id="prod-desc" formControlName="description" rows="3" class="drawer-textarea" placeholder="Enterprise specifications, firmware version, and packaging tags..."></textarea>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Sticky Drawer Footer -->
+      <footer class="drawer-footer">
+        <button type="button" class="btn-drawer-cancel" (click)="close.emit()">Cancel</button>
+        <button type="button" class="btn-drawer-save" (click)="onSave()">
+          <span>Save SKU Specification</span>
+        </button>
+      </footer>
+
+    </aside>
+  </div>
+}
+

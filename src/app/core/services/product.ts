@@ -31,4 +31,7 @@ export class ProductService {
   public deleteProduct(id: string): Observable<any> {
     return this.http.delete(`${this.baseUrl}/${id}`);
   }
+  public updateProduct(id: string, payload: Partial<ProductItem>): Observable<ProductItem> {
+    return this.http.put<ProductItem>(`${this.baseUrl}/${id}`, payload);
+  }
 }

@@ -1,0 +1,283 @@
+:host {
+  display: flex;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.filtering-dock-rail {
+  width: 280px;
+  background-color: var(--omni-bg-surface, #0f172a);
+  border-right: 1px solid var(--omni-border-subtle, rgba(255, 255, 255, 0.08));
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
+  animation: omni-fade-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dock-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.125rem 1.25rem;
+  border-bottom: 1px solid var(--omni-border-subtle, rgba(255, 255, 255, 0.06));
+}
+
+.dock-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dock-header-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--omni-primary, #6366f1);
+}
+
+.dock-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.dock-reset-btn {
+  background: transparent;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--omni-text-muted, #64748b);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all var(--omni-transition-fast, 0.15s ease);
+
+  &:hover {
+    color: var(--omni-primary, #6366f1);
+    background: rgba(99, 102, 241, 0.1);
+  }
+}
+
+.dock-sections {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--omni-text-muted, #64748b);
+}
+
+/* Category Checkbox Items */
+.filter-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dock-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.8125rem;
+  color: var(--omni-text-secondary, #94a3b8);
+  transition: color var(--omni-transition-fast, 0.15s ease);
+
+  input[type="checkbox"] {
+    display: none;
+
+    &:checked + .dock-check-box {
+      background: var(--omni-primary, #6366f1);
+      border-color: var(--omni-primary, #6366f1);
+
+      &::after {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  }
+
+  .dock-check-box {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1px solid var(--omni-border-subtle, rgba(255, 255, 255, 0.18));
+    background: rgba(15, 23, 42, 0.6);
+    position: relative;
+    transition: all var(--omni-transition-fast, 0.15s ease);
+    flex-shrink: 0;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 2px;
+      width: 4px;
+      height: 8px;
+      border: solid #ffffff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg) scale(0.6);
+      opacity: 0;
+      transition: all var(--omni-transition-fast, 0.15s ease);
+    }
+  }
+
+  .cat-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cat-count {
+    font-size: 0.6875rem;
+    color: var(--omni-text-muted, #64748b);
+    padding: 1px 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--omni-radius-full, 9999px);
+  }
+
+  &:hover {
+    color: #ffffff;
+    .dock-check-box { border-color: rgba(255, 255, 255, 0.3); }
+  }
+}
+
+/* Dual Handle Price Slider */
+.price-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.price-indicators {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-family: var(--omni-font-mono, monospace);
+}
+
+.price-chip {
+  padding: 2px 6px;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 4px;
+  color: #818cf8;
+  font-weight: 600;
+}
+
+.price-separator {
+  color: var(--omni-text-muted, #64748b);
+}
+
+.dual-slider-container {
+  position: relative;
+  height: 24px;
+  display: flex;
+  align-items: center;
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+  }
+
+  .slider-track-highlight {
+    position: absolute;
+    height: 4px;
+    background: var(--omni-primary, #6366f1);
+    border-radius: 2px;
+    z-index: 1;
+  }
+
+  .range-thumb {
+    position: absolute;
+    width: 100%;
+    height: 4px;
+    background: transparent;
+    appearance: none;
+    pointer-events: none;
+    z-index: 2;
+    outline: none;
+
+    &::-webkit-slider-thumb {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid var(--omni-primary, #6366f1);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+      cursor: pointer;
+      pointer-events: auto;
+      transition: transform var(--omni-transition-fast, 0.15s ease);
+
+      &:hover {
+        transform: scale(1.15);
+      }
+    }
+
+    &::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid var(--omni-primary, #6366f1);
+      cursor: pointer;
+      pointer-events: auto;
+    }
+  }
+}
+
+/* Stock Status Radios */
+.status-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.status-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: var(--omni-text-secondary, #94a3b8);
+  cursor: pointer;
+
+  input[type="radio"] {
+    accent-color: var(--omni-primary, #6366f1);
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+
+    &.dot-all { background: #94a3b8; }
+    &.dot-instock { background: #10b981; }
+    &.dot-low { background: #f59e0b; }
+  }
+
+  &:hover {
+    color: #ffffff;
+  }
+}
+
