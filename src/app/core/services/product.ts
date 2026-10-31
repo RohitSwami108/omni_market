@@ -8,8 +8,11 @@ import { PaginatedResponse, ProductFilters, ProductItem } from '../model/product
 })
 export class ProductService {
   private http = inject(HttpClient);
-  private readonly apiEndPoint = '/api/products';
+  private readonly baseUrl = '/api/products';
 
+  public createProduct(payload: ProductItem): Observable<ProductItem> {
+    return this.http.post<ProductItem>(`${this.baseUrl}`, payload);
+  }
   public getProducts(filters: ProductFilters): Observable<PaginatedResponse<ProductItem>> {
     let params = new HttpParams();
     Object.entries(filters).forEach(([key, value]) => {
@@ -23,9 +26,9 @@ export class ProductService {
         }
       }
     });
-    return this.http.get<PaginatedResponse<ProductItem>>(this.apiEndPoint, { params });
+    return this.http.get<PaginatedResponse<ProductItem>>(this.baseUrl, { params });
   }
   public deleteProduct(id: string): Observable<any> {
-    return this.http.delete(`${this.apiEndPoint}/${id}`);
+    return this.http.delete(`${this.baseUrl}/${id}`);
   }
 }

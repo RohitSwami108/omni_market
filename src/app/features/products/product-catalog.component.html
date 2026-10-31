@@ -75,12 +75,12 @@
           <div class="filter-section">
             <h3 class="section-label">Categories</h3>
             <div class="filter-options-list">
-              @for (cat of categoryOptions; track cat.name) {
+              @for (cat of categoryOptions(); track cat.name) {
                 <label class="dock-checkbox-row">
                   <input type="checkbox" [checked]="selectedCategories().includes(cat.name)" (change)="toggleCategory(cat.name)">
                   <span class="dock-check-box"></span>
                   <span class="cat-label">{{ cat.name }}</span>
-                  <span class="cat-count">{{ cat.count }}</span>
+                  <span class="cat-count">{{ 1 }}</span>
                 </label>
               }
             </div>
@@ -256,7 +256,7 @@
 
                 <!-- Category -->
                 <td class="col-category">
-                  <span class="category-pill">{{ product.category }}</span>
+                  <span class="category-pill">{{ product.categoryId }}</span>
                 </td>
 
                 <!-- Price -->
@@ -393,20 +393,15 @@
             <div class="drawer-two-col">
               <div class="drawer-field">
                 <label class="drawer-label" for="prod-sku">SKU Code *</label>
-                <input 
-                  id="prod-sku"
-                  type="text" 
-                  formControlName="sku"
-                  class="drawer-input font-mono" 
-                  placeholder="OGW-8820-PRO">
+                <input id="prod-sku" type="text" formControlName="sku" class="drawer-input font-mono" placeholder="OGW-8820-PRO">
                 <app-input-error [control]="productForm.controls.sku" fieldLabel="SKU Code"></app-input-error>
               </div>
 
               <div class="drawer-field">
                 <label class="drawer-label" for="prod-cat">Category *</label>
-                <select id="prod-cat" formControlName="category" class="drawer-select">
-                  @for (c of categoryOptions; track c.name) {
-                    <option [value]="c.name">{{ c.name }}</option>
+                <select id="prod-cat" formControlName="categoryId" class="drawer-select">
+                  @for (c of categoryOptions(); track c.name) {
+                    <option [value]="c.id">{{ c.name }}</option>
                   }
                 </select>
               </div>

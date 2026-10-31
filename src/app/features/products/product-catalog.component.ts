@@ -4,6 +4,8 @@ import { FormsModule, ReactiveFormsModule, FormGroup, FormControl, Validators } 
 import { ProductService } from '../../core/services/product';
 import { ProductItem, ProductFilters, PaginatedResponse } from '../../core/model/product.model';
 import { InputErrorComponent } from '../../shared/components/input-error/input-error.component';
+import { CategoryService } from '../../core/services/category';
+import { Category } from '../../core/model/category.model';
 
 @Component({
   selector: 'app-product-catalog',
@@ -14,6 +16,7 @@ import { InputErrorComponent } from '../../shared/components/input-error/input-e
 })
 export class ProductCatalogComponent implements OnInit {
   private readonly productService = inject(ProductService);
+  private readonly categoryService = inject(CategoryService);
 
   // 1. UI State Signals
   readonly isFilterDockOpen = signal<boolean>(true);
@@ -23,7 +26,7 @@ export class ProductCatalogComponent implements OnInit {
 
   // 2. Filter & Search Signals
   readonly searchQuery = signal<string>('');
-  readonly selectedCategories = signal<string[]>(['Electronics', 'Networking']);
+  readonly selectedCategories = signal<string[]>([]);
   readonly priceRange = signal<{ min: number; max: number }>({ min: 50, max: 2400 });
 
   // Aliases for backend consistency
@@ -54,27 +57,16 @@ export class ProductCatalogComponent implements OnInit {
   readonly productForm = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.minLength(4)]),
     sku: new FormControl('', [Validators.required, Validators.pattern(/^[A-Z0-9-]+$/)]),
-    category: new FormControl('Electronics', [Validators.required]),
+    categoryId: new FormControl('', [Validators.required]),
     price: new FormControl(299.99, [Validators.required, Validators.min(0.01)]),
     stock: new FormControl(50, [Validators.required, Validators.min(0)]),
     description: new FormControl('')
   });
 
   // 6. Categories Definition
-  readonly categoryOptions = [
-    { name: 'Electronics', count: 142 },
-    { name: 'Networking', count: 68 },
-    { name: 'Industrial Hardware', count: 89 },
-    { name: 'Wearables & IoT', count: 34 },
-    { name: 'Enterprise Servers', count: 51 }
-  ];
-
-  // 7. Base Dataset (Used as default / fallback when API is connecting)
-  private readonly fallbackCatalog: ProductItem[] = [];
-
-  // Server response store
-  readonly productsList = signal<ProductItem[]>(this.fallbackCatalog);
-  readonly serverTotalCount = signal<number>(this.fallbackCatalog.length);
+  private categoryOptions = signal<Category[]>([]);
+  readonly productsList = signal<ProductItem[]>([]);
+  readonly serverTotalCount = signal<number>(this.productsList().length);
   readonly isApiConnected = signal<boolean>(false);
 
   // Filtered & Sorted Display Products
@@ -94,16 +86,14 @@ export class ProductCatalogComponent implements OnInit {
       list = list.filter(p =>
         p.name.toLowerCase().includes(query) ||
         p.sku.toLowerCase().includes(query) ||
-        p.category.toLowerCase().includes(query)
+        p.categoryId.toLowerCase().includes(query)
       );
     }
 
     if (cats.length > 0) {
-      list = list.filter(p => cats.includes(p.category));
+      list = list.filter(p => cats.includes(p.categoryId));
     }
-
     list = list.filter(p => p.price >= price.min && p.price <= price.max);
-
     const field = this.sortField() as keyof ProductItem;
     const dir = this.sortDirection() === 'asc' ? 1 : -1;
     return [...list].sort((a, b) => {
@@ -128,6 +118,7 @@ export class ProductCatalogComponent implements OnInit {
 
   ngOnInit(): void {
     this.fetchCatalogData();
+    this.fetchCategoriesData();
   }
 
   // Fetch catalog data from backend API with graceful fallback
@@ -158,7 +149,16 @@ export class ProductCatalogComponent implements OnInit {
       }
     });
   }
-
+  fetchCategoriesData() {
+    this.categoryService.getAllCategories().subscribe({
+      next: (res: Category[]) => {
+        this.categoryOptions.set(res);
+      },
+      error: (err) => {
+        console.error('Error fetching categories:', err);
+      }
+    })
+  }
   // Sorting
   public handleSort(field: keyof ProductItem | string): void {
     if (this.sortField() === field) {
@@ -222,7 +222,6 @@ export class ProductCatalogComponent implements OnInit {
   public openCreateDrawer(): void {
     this.drawerMode.set('create');
     this.productForm.reset({
-      category: 'Electronics',
       price: 199.99,
       stock: 25
     });
@@ -234,7 +233,7 @@ export class ProductCatalogComponent implements OnInit {
     this.productForm.setValue({
       name: prod.name,
       sku: prod.sku,
-      category: prod.category,
+      categoryId: prod.categoryId,
       price: prod.price,
       stock: prod.stock,
       description: `Industrial-grade enterprise configuration for ${prod.name}`
@@ -262,14 +261,20 @@ export class ProductCatalogComponent implements OnInit {
         id: `prod-00${Date.now().toString().slice(-3)}`,
         name: formVal.name!,
         sku: formVal.sku!,
-        category: formVal.category!,
+        categoryId: formVal.categoryId!,
         price: formVal.price!,
         stock: formVal.stock!,
         stockStatus: (formVal.stock! > 10 ? 'in_stock' : formVal.stock! > 0 ? 'low_stock' : 'out_of_stock'),
         imageUrl: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=100&h=100&fit=crop&q=80',
-        updatedAt: 'Just now'
+        updatedAt: new Date().toISOString()
       };
-      this.productsList.update(list => [newProd, ...list]);
+      this.productService.createProduct(newProd).subscribe({
+        next: (res) => {
+          this.fetchCatalogData();
+        }, error: () => {
+
+        }
+      })
     }
     this.closeDrawer();
   }

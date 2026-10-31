@@ -2,7 +2,7 @@ export interface ProductItem {
   id: string;
   name: string;
   sku: string;
-  category: string;
+  categoryId: string;
   price: number;
   stock: number;
   stockStatus: 'in_stock' | 'low_stock' | 'out_of_stock';
